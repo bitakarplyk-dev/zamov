@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Облік замовлень</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--bg2:#161b27;--bg3:#1e2536;--bg4:#252d40;
+  --border:#2a3348;--border2:#3a4560;
+  --text:#e8ecf4;--text2:#8a95b0;--text3:#4a5570;
+  --accent:#4f8ef7;--accent2:#3a6fd4;
+  --green:#2dd4a0;--red:#e05555;--amber:#f5a623;--purple:#a878f5;
+  --radius:12px;--radius2:8px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Manrope',sans-serif;font-size:14px}
+.layout{display:flex;height:100vh;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{width:228px;min-width:228px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column}
+.logo{padding:20px 18px 14px;font-size:17px;font-weight:700;letter-spacing:-.3px}
+.logo span{color:var(--accent)}
+.nav{padding:4px 10px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:var(--radius2);cursor:pointer;color:var(--text2);font-size:13px;font-weight:500;transition:all .15s;margin-bottom:2px}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--bg3);color:var(--text)}
+.nav-item svg{width:15px;height:15px;flex-shrink:0}
+.sidebar-bottom{flex:1;padding:10px 12px 12px;border-top:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.sl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;padding-left:2px}
+.msel{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:13px;padding:7px 9px;border-radius:var(--radius2);cursor:pointer;outline:none}
+.msel:focus{border-color:var(--accent)}
+
+/* ── DAY CALENDAR ── */
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.cal-title{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;padding-left:2px}
+.cal-reset{background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;font-weight:600;display:none}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-wd{font-size:9px;color:var(--text3);text-align:center;padding-bottom:3px;font-weight:600}
+.cal-day{display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:5px;cursor:pointer;padding:3px 1px;transition:background .12s;min-height:28px}
+.cal-day:hover{background:var(--bg4)}
+.cal-day-num{font-size:11px;font-weight:600;color:var(--text3);line-height:1}
+.cal-day.has-data .cal-day-num{color:var(--text2)}
+.cal-day-sum{font-size:8px;color:var(--green);font-weight:700;line-height:1;margin-top:1px;white-space:nowrap}
+.cal-day.sel{background:var(--accent)!important}
+.cal-day.sel .cal-day-num{color:#fff}
+.cal-day.sel .cal-day-sum{color:rgba(255,255,255,.85)}
+.cal-day.today .cal-day-num{color:var(--accent)}
+.cal-day.sel.today .cal-day-num{color:#fff}
+
+/* day summary bar (shows when day selected) */
+.day-bar{background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.25);border-radius:var(--radius2);padding:8px 10px;display:none}
+.day-bar.visible{display:block}
+.day-bar-date{font-size:11px;color:var(--accent);font-weight:700;margin-bottom:4px}
+.day-bar-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px}
+.day-bar-label{color:var(--text3)}
+.day-bar-val{font-weight:700}
+.day-bar-val.green{color:var(--green)}
+.day-bar-val.red{color:var(--red)}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.page{display:none;padding:22px 26px}
+.page.active{display:block}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:12px}
+.page-title{font-size:20px;font-weight:700;letter-spacing:-.4px}
+.page-sub{font-size:12px;color:var(--text2);margin-top:3px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:var(--radius2);border:none;font-family:'Manrope',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-danger{background:rgba(224,85,85,.1);color:var(--red);border:1px solid rgba(224,85,85,.2)}
+.btn-danger:hover{background:rgba(224,85,85,.2)}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn-xs{padding:2px 7px;font-size:11px}
+
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:18px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:13px 15px}
+.stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.stat-val{font-size:21px;font-weight:700}
+.stat-val.green{color:var(--green)}
+.stat-val.red{color:var(--red)}
+.stat-val.amber{color:var(--amber)}
+.stat-hint{font-size:10px;color:var(--text3);margin-top:3px}
+
+/* ── TOOLBAR ── */
+.toolbar{display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.toolbar select,.toolbar input[type=text]{background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:13px;padding:6px 9px;border-radius:var(--radius2);outline:none}
+.toolbar select:focus,.toolbar input:focus{border-color:var(--accent)}
+.spacer{flex:1}
+
+/* ── TABLE ── */
+.table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead tr{background:var(--bg3)}
+th{padding:8px 11px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:8px 11px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;font-size:13px}
+tbody tr:last-child td{border-bottom:none}
+
+/* date group header row */
+.dg-row td{background:rgba(255,255,255,.02);color:var(--text3);font-size:11px;font-weight:700;padding:5px 11px;border-top:1px solid var(--border2);border-bottom:1px solid var(--border);letter-spacing:.04em}
+.dg-sum{color:var(--green);font-weight:700}
+.dg-unpaid{color:var(--red);font-size:10px;margin-left:8px;font-weight:600}
+
+/* order rows */
+.ord-row td{cursor:pointer;padding:7px 11px}
+.ord-row:hover td{background:var(--bg3)}
+.ord-num{font-weight:700;font-size:13px}
+.ord-date{font-size:11px;color:var(--text3)}
+.ord-sum{font-weight:700;color:var(--green);white-space:nowrap}
+.ord-unpaid{color:var(--red);font-weight:700;white-space:nowrap}
+.actions{display:flex;gap:4px;justify-content:flex-end}
+
+/* service expand */
+.svc-expand-row td{padding:0;border-bottom:1px solid var(--border)}
+.svc-expand-inner{background:var(--bg3)}
+.svc-expand-inner table{background:transparent}
+.svc-expand-inner td{padding:5px 11px 5px 40px;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text2)}
+.svc-expand-inner tr:last-child td{border-bottom:none}
+
+/* unpaid badge */
+.unpaid-badge{display:inline-flex;align-items:center;padding:1px 7px;border-radius:100px;font-size:10px;font-weight:700;background:rgba(224,85,85,.12);color:var(--red);border:1px solid rgba(224,85,85,.2);white-space:nowrap}
+.paid-badge{display:inline-flex;align-items:center;padding:1px 7px;border-radius:100px;font-size:10px;font-weight:700;background:rgba(45,212,160,.1);color:var(--green);border:1px solid rgba(45,212,160,.2);white-space:nowrap}
+
+/* ── BADGE STATUS ── */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;white-space:nowrap}
+.badge-new{background:rgba(138,149,176,.12);color:var(--text2)}
+.badge-process{background:rgba(79,142,247,.15);color:#7ab0ff}
+.badge-ready{background:rgba(245,166,35,.15);color:var(--amber)}
+.badge-done{background:rgba(45,212,160,.15);color:var(--green)}
+
+/* ── AVATAR ── */
+.ava{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.av-blue{background:rgba(79,142,247,.2);color:var(--accent)}
+.av-green{background:rgba(45,212,160,.2);color:var(--green)}
+.av-amber{background:rgba(245,166,35,.2);color:var(--amber)}
+.av-red{background:rgba(224,85,85,.2);color:var(--red)}
+.av-purple{background:rgba(168,120,245,.2);color:var(--purple)}
+
+/* ── REPORT ── */
+.report-block{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:14px}
+.rb-title{padding:11px 15px;font-size:12px;font-weight:700;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;color:var(--text)}
+.rb-note{margin-left:auto;font-size:10px;color:var(--text3);font-weight:400}
+
+/* worker block in report */
+.wb{border-bottom:1px solid var(--border)}
+.wb:last-child{border-bottom:none}
+.wb-head{display:flex;align-items:center;gap:11px;padding:12px 15px;background:rgba(79,142,247,.03)}
+.wb-name{font-size:14px;font-weight:700;flex:1}
+.wb-days{font-size:11px;color:var(--text3);font-weight:400;margin-left:4px}
+.wb-total{font-size:15px;font-weight:700;color:var(--green)}
+.wb-stats{display:grid;grid-template-columns:1fr 1fr 1fr;background:var(--border);gap:1px}
+.wb-stat{background:var(--bg2);padding:10px 15px}
+.wb-stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.wb-stat-val{font-size:18px;font-weight:700}
+.wb-stat-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.wb-stat-sum{font-size:12px;color:var(--green);font-weight:700;margin-top:2px}
+.prepaid-badge{display:inline-flex;align-items:center;padding:1px 7px;border-radius:100px;font-size:10px;font-weight:700;background:rgba(168,120,245,.12);color:var(--purple);border:1px solid rgba(168,120,245,.2);white-space:nowrap}
+.svc-breakdown{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+.svc-th{padding:5px 10px;background:var(--bg3);color:var(--text2);font-weight:600;text-align:center;border:1px solid var(--border);white-space:nowrap}
+.svc-role{padding:5px 10px;color:var(--text3);font-size:11px;font-weight:600;border:1px solid var(--border);white-space:nowrap;background:var(--bg3)}
+.svc-td{padding:5px 10px;text-align:center;border:1px solid var(--border);color:var(--text);font-weight:500}
+.int-badge{display:inline-flex;align-items:center;padding:1px 7px;border-radius:100px;font-size:10px;font-weight:700;background:rgba(245,166,35,.12);color:var(--amber);border:1px solid rgba(245,166,35,.2);white-space:nowrap}
+.deduct-row{background:rgba(224,85,85,.06)}
+.pb{height:3px;background:var(--bg4);border-radius:2px;margin:0 15px 10px}
+.pb-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s}
+
+/* report grand totals */
+.report-grand{padding:13px 15px;display:flex;align-items:center;justify-content:space-between;background:rgba(45,212,160,.04);border-top:1px solid var(--border)}
+.rg-label{font-size:13px;color:var(--text2)}
+.rg-sub{font-size:11px;color:var(--text3);margin-top:3px}
+.rg-val{font-size:20px;font-weight:700;color:var(--green);text-align:right}
+.rg-sub2{font-size:11px;color:var(--text3);margin-top:3px;text-align:right}
+
+/* month summary table in report */
+.ms-table td{padding:7px 14px;font-size:13px;border-bottom:1px solid var(--border)}
+.ms-table tr:last-child td{border-bottom:none}
+.ms-table .ms-label{color:var(--text2)}
+.ms-table .ms-val{font-weight:700;text-align:right}
+.ms-table .ms-val.green{color:var(--green)}
+.ms-table .ms-val.red{color:var(--red)}
+.ms-table .ms-val.amber{color:var(--amber)}
+
+/* services / workers pages */
+.services-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:9px}
+.svc-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:13px 15px;display:flex;justify-content:space-between;align-items:center}
+.svc-n{font-size:13px;font-weight:600}
+.svc-p{font-size:13px;font-weight:700;color:var(--green)}
+.svc-u{font-size:10px;color:var(--text3);margin-top:2px}
+.workers-list{display:flex;flex-direction:column;gap:7px}
+.worker-row{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:11px 15px;display:flex;align-items:center;gap:11px}
+.wr-name{flex:1;font-weight:600}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:999;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;width:580px;max-width:96vw;max-height:93vh;overflow-y:auto}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:14px}
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.fg-row{display:grid;gap:10px;margin-bottom:10px}
+.fg-row.c2{grid-template-columns:1fr 1fr}
+.fg-row.c3{grid-template-columns:1fr 1fr 1fr}
+.fg-row.c4{grid-template-columns:1fr 1fr 1fr 1fr}
+.fl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.fi{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:13px;padding:7px 9px;border-radius:var(--radius2);outline:none;width:100%}
+.fi:focus{border-color:var(--accent)}
+select.fi option{background:#1e2536;color:#e8ecf4}
+.msvc-svc{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:13px;padding:6px 8px;border-radius:var(--radius2);outline:none;width:100%}
+.msvc-svc:focus{border-color:var(--accent)}
+.msvc-svc option{background:#1e2536;color:#e8ecf4}
+
+/* ─── ADMIN MODAL ─── */
+.admin-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:flex;align-items:center;justify-content:center}
+.admin-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:32px 28px;width:300px;text-align:center}
+.admin-box h2{font-size:17px;font-weight:700;margin-bottom:6px}
+.admin-box p{font-size:12px;color:var(--text3);margin-bottom:20px}
+.admin-box input{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:16px;text-align:center;letter-spacing:4px;margin-bottom:10px}
+.admin-box input:focus{outline:none;border-color:var(--blue)}
+.admin-box .err{color:var(--red);font-size:12px;min-height:16px;margin-bottom:8px}
+.admin-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--green);background:rgba(34,197,94,.1);border-radius:20px;padding:3px 10px;margin-bottom:6px}
+
+/* ─── ADMIN WORKER TAG ─── */
+.msvc-wrap{border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;margin-bottom:8px}
+.msvc-head{display:grid;grid-template-columns:1fr 66px 88px 95px 28px;background:var(--bg3);border-bottom:1px solid var(--border)}
+.msvc-head span{padding:5px 7px;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.msvc-row{display:grid;grid-template-columns:1fr 66px 88px 95px 28px;border-bottom:1px solid var(--border);align-items:center}
+.msvc-row:last-child{border-bottom:none}
+.msvc-row:hover{background:rgba(255,255,255,.02)}
+.mc{padding:2px 5px}
+.mc select{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:12px;padding:5px 6px;border-radius:var(--radius2);outline:none;width:100%;cursor:pointer}
+.mc select:focus{border-color:var(--accent)}
+.mc select option{background:#1e2536;color:#e8ecf4}
+.mc input{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'Manrope',sans-serif;font-size:12px;padding:5px 6px;border-radius:var(--radius2);outline:none;width:100%}
+.mc input:focus{border-color:var(--accent)}
+.mc select,.mc input{background:transparent;border:none;color:var(--text);font-family:'Manrope',sans-serif;font-size:12px;outline:none;width:100%;padding:5px 4px}
+.mc-sum{padding:5px 7px;font-size:12px;font-weight:700;color:var(--green)}
+.mc-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:4px 5px;line-height:1;width:100%}
+.mc-del:hover{color:var(--red)}
+.modal-foot{display:flex;gap:7px;justify-content:flex-end;margin-top:13px;padding-top:13px;border-top:1px solid var(--border)}
+
+/* ── MISC ── */
+.empty{text-align:center;padding:32px;color:var(--text3);font-size:13px}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="logo">ОБЛІК<span>.</span></div>
+  <nav class="nav">
+    <div class="nav-item active" onclick="showPage('orders',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Замовлення
+    </div>
+    <div class="nav-item" id="navReport" onclick="showPage('report',this)" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Звіт
+    </div>
+    <div class="nav-item" id="navAdminLogin" onclick="openAdminLogin()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Звіт (адмін)
+    </div>
+    <div class="nav-item" onclick="showPage('workers',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Працівники
+    </div>
+    <div class="nav-item" onclick="showPage('services',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Послуги
+    </div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div id="adminBadge" style="display:none">
+      <div class="admin-badge">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4 2 7L12 17l-6.5 3 2-7L2 9h7z"/></svg>
+        Адмін
+      </div>
+      <div style="font-size:10px;color:var(--text3);cursor:pointer;text-align:right" onclick="adminLogout()">Вийти</div>
+    </div>
+    <div id="syncLbl" style="font-size:12px;color:var(--green);opacity:1;text-align:right;min-height:14px;word-break:break-all"></div>
+    <div>
+      <div class="sl">Рік</div>
+      <select class="msel" id="yearSel"></select>
+    </div>
+    <div>
+      <div class="sl">Місяць</div>
+      <select class="msel" id="monthSel"></select>
+    </div>
+    <div>
+      <div class="cal-header">
+        <div class="cal-title">Оберіть день</div>
+        <button class="cal-reset" id="calReset" onclick="clearDay()">✕ скинути</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+    <!-- Day summary bar -->
+    <div class="day-bar" id="dayBar">
+      <div class="day-bar-date" id="dayBarDate"></div>
+      <div class="day-bar-row"><span class="day-bar-label">Замовлень</span><span class="day-bar-val" id="dbCount">—</span></div>
+      <div class="day-bar-row"><span class="day-bar-label">Загальна сума</span><span class="day-bar-val green" id="dbTotal">—</span></div>
+      <div class="day-bar-row"><span class="day-bar-label">Оплачено</span><span class="day-bar-val green" id="dbPaid">—</span></div>
+      <div class="day-bar-row" id="dbPrepaidRow" style="display:none"><span class="day-bar-label" style="color:var(--purple)">Передплата</span><span class="day-bar-val" style="color:var(--purple)" id="dbPrepaid">—</span></div>
+      <div class="day-bar-row"><span class="day-bar-label">Неоплачено</span><span class="day-bar-val red" id="dbUnpaid">—</span></div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+
+  <!-- ORDERS -->
+  <section class="page active" id="page-orders">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Замовлення</div>
+        <div class="page-sub" id="ordSub"></div>
+      </div>
+      <button class="btn btn-primary" onclick="openAddOrder()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Нове замовлення
+      </button>
+    </div>
+    <div class="stats-row" id="ordStats"></div>
+    <div class="toolbar">
+      <select id="fWorker" onchange="renderOrders()"><option value="">Всі працівники</option></select>
+      <select id="fSvc" onchange="renderOrders()"><option value="">Всі послуги</option></select>
+      <select id="fStatus" onchange="renderOrders()">
+        <option value="">Всі статуси</option>
+        <option value="new">Нове</option>
+        <option value="process">В роботі</option>
+        <option value="ready">Готово</option>
+        <option value="done">Видано</option>
+      </select>
+      <select id="fPaid" onchange="renderOrders()">
+        <option value="">Всі</option>
+        <option value="unpaid">Неоплачені</option>
+        <option value="paid">Оплачені</option>
+        <option value="prepaid">Передплата</option>
+      </select>
+      <input type="text" id="fNum" placeholder="Пошук №..." oninput="globalSearch()" style="width:160px">
+      <div class="spacer"></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th style="width:28px"></th>
+          <th>Замовлення</th>
+          <th>Послуги</th>
+          <th>ОП</th><th>Обробка</th><th>Видача</th>
+          <th>Статус</th>
+          <th>Оплата</th>
+          <th style="text-align:right">Сума</th>
+          <th style="width:70px"></th>
+        </tr></thead>
+        <tbody id="ordBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- REPORT -->
+  <section class="page" id="page-report">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Звіт</div>
+        <div class="page-sub" id="repSub"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <label style="font-size:12px;color:var(--text3)">День:</label>
+        <select class="fi" id="repDayFilter" onchange="renderReport()" style="width:130px;padding:6px 10px">
+          <option value="">Весь місяць</option>
+        </select>
+        <button class="btn btn-outline" onclick="exportCSV()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Експорт CSV
+        </button>
+      </div>
+    </div>
+    <div id="repContent"></div>
+  </section>
+
+  <!-- WORKERS -->
+  <section class="page" id="page-workers">
+    <div class="page-header">
+      <div class="page-title">Працівники</div>
+      <button class="btn btn-primary" onclick="openAddWorker()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Додати
+      </button>
+    </div>
+    <div class="workers-list" id="workersList"></div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="page" id="page-services">
+    <div class="page-header">
+      <div class="page-title">Послуги та ціни</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline" onclick="resetServices()">↺ Оновити список</button>
+        <button class="btn btn-primary" onclick="openAddService()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Нова послуга
+        </button>
+      </div>
+    </div>
+    <div class="services-grid" id="svcList"></div>
+  </section>
+
+</main>
+</div>
+
+<!-- ═══ ORDER MODAL ═══ -->
+<div class="modal-overlay" id="ordModal">
+  <div class="modal">
+    <div class="modal-title" id="ordModalTitle">Нове замовлення</div>
+    <div class="fg-row c2">
+      <div class="fg"><label class="fl">Дата</label><input class="fi" type="date" id="mDate"></div>
+      <div class="fg"><label class="fl">Номер замовлення</label><input class="fi" type="text" id="mNum" placeholder="напр. 134374"></div>
+    </div>
+    <div class="fg-row c2">
+      <div class="fg"><label class="fl">⏱ Час прийому</label><input class="fi" type="time" id="mCreatedAt"></div>
+      <div class="fg"><label class="fl">✅ Час видачі</label><input class="fi" type="time" id="mDeliveredAt"></div>
+    </div>
+    <div class="fg-row c3">
+      <div class="fg"><label class="fl">ОП (прийняв)</label><select class="fi" id="mOP"></select></div>
+      <div class="fg"><label class="fl">Обробка</label><select class="fi" id="mObrob"></select></div>
+      <div class="fg"><label class="fl">Видача</label><select class="fi" id="mVyd"></select></div>
+    </div>
+    <div class="fg-row c2">
+      <div class="fg"><label class="fl">Статус</label>
+        <select class="fi" id="mStatus">
+          <option value="new">Нове</option><option value="process">В роботі</option>
+          <option value="ready">Готово</option><option value="done">Видано</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Оплата</label>
+        <select class="fi" id="mPaid" onchange="togglePaidDate()">
+          <option value="unpaid">Не оплачено</option>
+          <option value="prepaid">Передплата</option>
+          <option value="paid">Оплачено</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg-row c2" id="paidDateRow" style="display:none">
+      <div class="fg" style="grid-column:1/-1"><label class="fl">Дата оплати</label><input class="fi" type="date" id="mPaidDate"></div>
+    </div>
+    <div class="fg-row c2" style="margin-bottom:10px">
+      <div class="fg" style="grid-column:1/-1"><label class="fl">Примітка</label><input class="fi" type="text" id="mNote" placeholder="необов'язково"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;padding:10px 12px;background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.2);border-radius:var(--radius2)">
+      <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;color:var(--amber);font-weight:600">
+        <input type="checkbox" id="mInternal" onchange="toggleInternal()"> Внутрішнє замовлення (для працівника)
+      </label>
+      <select class="fi" id="mInternalWorker" style="display:none;max-width:180px;margin-left:auto"></select>
+    </div>
+    <div class="fl" style="margin-bottom:5px">Послуги замовлення</div>
+    <div class="msvc-wrap">
+      <div class="msvc-head">
+        <span>Послуга</span><span>К-сть</span><span>Ціна, грн</span><span>Сума, грн</span><span></span>
+      </div>
+      <div id="msvcBody"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <button class="btn btn-outline btn-sm" onclick="addSvcLine()">+ Додати послугу</button>
+      <span id="msvcGrand" style="margin-left:auto;font-size:14px;font-weight:700;color:var(--green)"></span>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeOrdModal()">Скасувати</button>
+      <button class="btn btn-primary" onclick="saveOrder()">Зберегти</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SVC MODAL ═══ -->
+<div class="modal-overlay" id="svcModal">
+  <div class="modal" style="width:310px">
+    <div class="modal-title">Нова послуга</div>
+    <div class="fg"><label class="fl">Назва</label><input class="fi" type="text" id="sName"></div>
+    <div class="fg" style="margin-top:8px"><label class="fl">Ціна (грн)</label><input class="fi" type="number" id="sPrice"></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeSvcModal()">Скасувати</button>
+      <button class="btn btn-primary" onclick="saveService()">Зберегти</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ WORKER MODAL ═══ -->
+<div class="modal-overlay" id="wrkModal">
+  <div class="modal" style="width:310px">
+    <div class="modal-title">Новий працівник</div>
+    <div class="fg"><label class="fl">Прізвище або ім'я</label><input class="fi" type="text" id="wName"></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeWrkModal()">Скасувати</button>
+      <button class="btn btn-primary" onclick="saveWorker()">Додати</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   АДМІН — змініть пароль тут
+   ═══════════════════════════════════════════════ */
+const ADMIN_PASSWORD = 'scopajr';
+const ADMIN_NAME     = 'Адмін';
+/* ═══════════════════════════════════════════════ */
+const FIREBASE_CONFIG = {
+  apiKey:      "AIzaSyBYY66HZcXAN5rGbv-iSQ4kc0gFgmIlWJU",
+  databaseURL: "https://oblik-zamovlen-fe088-default-rtdb.firebaseio.com",
+  projectId:   "oblik-zamovlen-fe088",
+  appId:       "1:138358249593:web:02d4a7731e14ae21c89ca8"
+};
+/* ═══════════════════════════════════════════════ */
+
+/* ─── CONSTANTS ─── */
+const AVC=['av-blue','av-green','av-amber','av-red','av-purple'];
+const MN=['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+const WD=['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
+const SL={new:'Нове',process:'В роботі',ready:'Готово',done:'Видано'};
+const SC={new:'badge-new',process:'badge-process',ready:'badge-ready',done:'badge-done'};
+
+/* ─── DATA ─── */
+let services = JSON.parse(localStorage.getItem('svc4')||'null') || [
+  {name:'фото на документи',price:200},
+  {name:'фото на документи з носія / цифровий варіант',price:170},
+  {name:'фото на візу США / грін карту',price:230},
+  {name:'ретуш',price:100},
+  {name:'фото 10х15',price:12},
+  {name:'фото 10х15 терм',price:24},
+  {name:'фото 13х18',price:20},
+  {name:'фото 13х18 терм',price:40},
+  {name:'фото 15х21',price:25},
+  {name:'фото 15х21 терм',price:50},
+  {name:'фото 21х30',price:50},
+  {name:'фото 21х30 терм',price:100},
+  {name:'фото 30х40',price:100},
+  {name:'фото 30х40 терм',price:200},
+  {name:'виготовлення візиток',price:500},
+  {name:'чашка біла',price:250},
+  {name:'чашка кольорова',price:300},
+  {name:'чашка хамелеон',price:350},
+  {name:'футболка',price:700},
+  {name:'виготовлення холста',price:700},
+  {name:'оцифровка',price:240},
+  {name:'скан',price:10},
+  {name:'акція вихідного дня 10х15',price:10}
+];
+let workers = JSON.parse(localStorage.getItem('wkrs4')||'null') || ['Карплюк','Харченко','Бортник'];
+let orders  = JSON.parse(localStorage.getItem('ord4') ||'[]');
+
+const now = new Date();
+let selYear=now.getFullYear(), selMonth=now.getMonth(), filterDay=null;
+let editIdx=null, expanded=new Set(), modalItems=[];
+
+/* ─── ADMIN LOGIC ─── */
+let isAdmin = false;
+
+function openAdminLogin(){
+  document.getElementById('adminOverlay').style.display='flex';
+  document.getElementById('adminPwdInput').value='';
+  document.getElementById('adminErr').textContent='';
+  setTimeout(()=>document.getElementById('adminPwdInput').focus(),100);
+}
+function closeAdminLogin(){
+  document.getElementById('adminOverlay').style.display='none';
+}
+function checkAdminPwd(){
+  const val=document.getElementById('adminPwdInput').value;
+  if(val===ADMIN_PASSWORD){
+    isAdmin=true;
+    closeAdminLogin();
+    document.getElementById('navReport').style.display='flex';
+    document.getElementById('navAdminLogin').style.display='none';
+    document.getElementById('adminBadge').style.display='block';
+    showPage('report', document.getElementById('navReport'));
+  } else {
+    document.getElementById('adminErr').textContent='Невірний пароль';
+    document.getElementById('adminPwdInput').value='';
+    document.getElementById('adminPwdInput').focus();
+  }
+}
+function adminLogout(){
+  isAdmin=false;
+  document.getElementById('navReport').style.display='none';
+  document.getElementById('navAdminLogin').style.display='flex';
+  document.getElementById('adminBadge').style.display='none';
+  showPage('orders', document.querySelector('.nav-item'));
+}
+
+/* ─── FIREBASE SYNC ─── */
+const DB = FIREBASE_CONFIG.databaseURL + '/oblik';
+
+async function fbSet(path, data){
+  await fetch(DB+'/'+path+'.json', {
+    method:'PUT',
+    body:JSON.stringify(data)
+  });
+}
+async function fbGet(path){
+  const r = await fetch(DB+'/'+path+'.json');
+  return r.ok ? r.json() : null;
+}
+
+let _syncActive = FIREBASE_CONFIG.apiKey !== 'ВАШ_API_KEY';
+
+function setSyncLabel(txt,color){
+  const el=document.getElementById('syncLbl');
+  if(!el)return;
+  el.textContent=txt;
+  el.style.color=color||'var(--green)';
+  el.style.opacity='1';
+}
+
+async function persist(){
+  localStorage.setItem('svc4',JSON.stringify(services));
+  localStorage.setItem('wkrs4',JSON.stringify(workers));
+  localStorage.setItem('ord4',JSON.stringify(orders));
+  if(!_syncActive){setSyncLabel('⚠ _syncActive=false — Firebase вимкнено','var(--red)');return;}
+  try{
+    setSyncLabel('📤 відправка в Firebase...','var(--amber)');
+    const ts = Date.now();
+    const r1=await fetch(DB+'/svc4.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(services)});
+    const r2=await fetch(DB+'/wkrs4.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(workers)});
+    const r3=await fetch(DB+'/ord4.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(orders)});
+    const r4=await fetch(DB+'/updatedAt.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(ts)});
+    if(r3.ok && r4.ok){
+      _lastTs=ts;
+      setSyncLabel('✓ збережено '+new Date(ts).toLocaleTimeString(),'var(--green)');
+    } else {
+      setSyncLabel('⚠ Firebase відхилив: '+r3.status+'/'+r4.status,'var(--red)');
+    }
+  }catch(e){setSyncLabel('⚠ помилка мережі: '+e.message,'var(--red)');}
+}
+
+async function loadCloud(){
+  if(!_syncActive)return false;
+  try{
+    const s=await fbGet('svc4');
+    const w=await fbGet('wkrs4');
+    const o=await fbGet('ord4');
+    const ts=await fbGet('updatedAt');
+    if(s&&Array.isArray(s))services=s;
+    if(w&&Array.isArray(w))workers=w;
+    if(o&&Array.isArray(o))orders=o;
+    if(ts) _lastTs=ts;
+    return true;
+  }catch(e){return false;}
+}
+
+let _lastTs=-1;
+async function syncPoll(){
+  if(!_syncActive)return;
+  try{
+    const ts=+(await fbGet('updatedAt'));
+    const now=new Date().toLocaleTimeString();
+    if(!ts){setSyncLabel('🔄 перевірка... немає ts '+now,'var(--text3)');return;}
+    if(ts===_lastTs){setSyncLabel('🔄 актуально '+now,'var(--text3)');return;}
+    setSyncLabel('📥 завантаження змін...','var(--amber)');
+    _lastTs=ts;
+    const o=await fbGet('ord4');
+    const s=await fbGet('svc4');
+    const w=await fbGet('wkrs4');
+    if(o&&Array.isArray(o))orders=o;
+    if(s&&Array.isArray(s))services=s;
+    if(w&&Array.isArray(w))workers=w;
+    migrate();renderAll();
+    setSyncLabel('↻ оновлено з іншого ПК '+now,'var(--green)');
+  }catch(e){setSyncLabel('⚠ poll помилка: '+e.message,'var(--red)');}
+}
+
+/* migrate old format */
+const SVC_RENAME={
+  'фото на doc':'фото на документи',
+  'фото на документи з носія цифровий варіант':'фото на документи з носія / цифровий варіант',
+  'фото на документи з носія/ цифровий варіант':'фото на документи з носія / цифровий варіант',
+  'фото на документи з носія/цифровий варіант':'фото на документи з носія / цифровий варіант',
+  'фото з носія':'фото на документи з носія / цифровий варіант',
+  'фото на doc з носія цифровий варіант':'фото на документи з носія / цифровий варіант',
+  'фото на doc з носія':'фото на документи з носія / цифровий варіант',
+  'фото на візу сша грін карту':'фото на візу США / грін карту',
+  'фото на візу сша/ грін карту':'фото на візу США / грін карту',
+  'фото на візу сша':'фото на візу США / грін карту',
+  '10x15':'фото 10х15',
+  '10х15':'фото 10х15',
+  '13x18':'фото 13х18',
+  '13х18':'фото 13х18',
+  '15x21':'фото 15х21',
+  '15х21':'фото 15х21',
+  '21x30':'фото 21х30',
+  '21х30':'фото 21х30',
+  '30x40':'фото 30х40',
+  '30х40':'фото 30х40',
+  '9x13':'фото 13х18',
+  '9х13':'фото 13х18',
+};
+function migrateSvcName(n){
+  if(!n)return n;
+  const k=n.trim().toLowerCase();
+  return SVC_RENAME[k]||SVC_RENAME[n.trim()]||n;
+}
+
+function migrate(){
+  orders = orders.map(o=>{
+    if(!o.items) o.items=[{service:o.service||'',qty:o.qty||1,price:o.price||0,total:o.total||0}];
+    if(!o.paid) o.paid='unpaid';
+    o.items=o.items.map(it=>({...it,service:migrateSvcName(it.service)}));
+    return o;
+  });
+}
+
+function oTotal(o){return(o.items||[]).reduce((s,it)=>s+(it.total||0),0);}
+function fmt(d){if(!d)return'—';const[y,m,day]=d.split('-');return day+'.'+m+'.'+y;}
+function p2(n){return String(n).padStart(2,'0');}
+function ds(y,m,d){return y+'-'+p2(m+1)+'-'+p2(d);}
+
+/* ─── SELECTORS ─── */
+function initSel(){
+  const ys=document.getElementById('yearSel');
+  ys.innerHTML='';
+  for(let y=2020;y<=2080;y++){const o=document.createElement('option');o.value=y;o.textContent=y;if(y===selYear)o.selected=true;ys.appendChild(o);}
+  ys.onchange=()=>{selYear=+ys.value;filterDay=null;renderAll();};
+
+  const ms=document.getElementById('monthSel');
+  ms.innerHTML='';
+  MN.forEach((n,i)=>{const o=document.createElement('option');o.value=i;o.textContent=n;if(i===selMonth)o.selected=true;ms.appendChild(o);});
+  ms.onchange=()=>{selMonth=+ms.value;filterDay=null;renderAll();};
+}
+function mLabel(){return MN[selMonth]+' '+selYear;}
+
+/* ─── CALENDAR ─── */
+function renderCal(){
+  const g=document.getElementById('calGrid');
+  g.innerHTML='';
+  WD.forEach(d=>{const el=document.createElement('div');el.className='cal-wd';el.textContent=d;g.appendChild(el);});
+
+  const first=new Date(selYear,selMonth,1);
+  const dim=new Date(selYear,selMonth+1,0).getDate();
+  const off=(first.getDay()+6)%7;
+  const todayStr=new Date().toISOString().slice(0,10);
+
+  const dayTot={}, dayUnpaid={};
+  monthOrders().forEach(o=>{
+    const t=oTotal(o);
+    // Оплачені — показуємо на дату оплати (якщо є), решта — на дату замовлення
+    const dateKey=(o.paid==='paid'||o.paid==='prepaid')&&o.paidDate ? o.paidDate : o.date;
+    dayTot[dateKey]=(dayTot[dateKey]||0)+t;
+    if(o.paid==='unpaid'||!o.paid) dayUnpaid[o.date]=(dayUnpaid[o.date]||0)+t;
+  });
+  // Оплати що прийшли цього місяця але замовлення з іншого місяця
+  orders.forEach(o=>{
+    if(!o.paidDate||(o.paid!=='paid'&&o.paid!=='prepaid'))return;
+    if(o.paidDate.slice(0,7)!==ds(selYear,selMonth,1).slice(0,7))return;
+    if(o.date.slice(0,7)===ds(selYear,selMonth,1).slice(0,7))return; // вже в monthOrders
+    const t=oTotal(o);
+    dayTot[o.paidDate]=(dayTot[o.paidDate]||0)+t;
+  });
+
+  for(let i=0;i<off;i++) g.appendChild(document.createElement('div'));
+  for(let d=1;d<=dim;d++){
+    const str=ds(selYear,selMonth,d);
+    const cell=document.createElement('div');
+    cell.className='cal-day'+(dayTot[str]?' has-data':'')+(str===filterDay?' sel':'')+(str===todayStr?' today':'');
+
+    const num=document.createElement('div');num.className='cal-day-num';num.textContent=d;cell.appendChild(num);
+    if(dayTot[str]){
+      const sv=document.createElement('div');sv.className='cal-day-sum';
+      const v=dayTot[str];sv.textContent=v>=1000?Math.round(v/100)/10+'к':v;
+      cell.appendChild(sv);
+    }
+    cell.onclick=()=>{
+      filterDay=(filterDay===str)?null:str;
+      document.getElementById('calReset').style.display=filterDay?'block':'none';
+      renderCal();renderDayBar();renderOrders();
+    };
+    g.appendChild(cell);
+  }
+}
+
+/* ─── DAY BAR ─── */
+function renderDayBar(){
+  const bar=document.getElementById('dayBar');
+  if(!filterDay){bar.classList.remove('visible');return;}
+  bar.classList.add('visible');
+  document.getElementById('dayBarDate').textContent=fmt(filterDay);
+  const dayO=monthOrders().filter(o=>o.date===filterDay);
+  const tot=dayO.reduce((s,o)=>s+oTotal(o),0);
+  const paid=dayO.filter(o=>o.paid==='paid').reduce((s,o)=>s+oTotal(o),0);
+  const prepaid=dayO.filter(o=>o.paid==='prepaid').reduce((s,o)=>s+oTotal(o),0);
+  const unpaid=dayO.filter(o=>o.paid==='unpaid'||!o.paid).reduce((s,o)=>s+oTotal(o),0);
+  document.getElementById('dbCount').textContent=dayO.length;
+  document.getElementById('dbTotal').textContent=tot.toLocaleString()+' грн';
+  document.getElementById('dbPaid').textContent=paid.toLocaleString()+' грн';
+  const prepRow=document.getElementById('dbPrepaidRow');
+  if(prepaid>0){prepRow.style.display='';document.getElementById('dbPrepaid').textContent=prepaid.toLocaleString()+' грн';}
+  else{prepRow.style.display='none';}
+  document.getElementById('dbUnpaid').textContent=unpaid.toLocaleString()+' грн';
+}
+
+function clearDay(){filterDay=null;document.getElementById('calReset').style.display='none';renderCal();renderDayBar();renderOrders();}
+
+/* ─── DATA HELPERS ─── */
+function monthOrders(){
+  return orders.filter(o=>{const d=new Date(o.date);return d.getFullYear()===selYear&&d.getMonth()===selMonth;});
+}
+function globalSearch(){
+  const q=(document.getElementById('fNum').value||'').trim().toLowerCase();
+  if(q.length>=2){
+    // шукаємо по ВСІХ замовленнях, не тільки поточному місяцю
+    const found=orders.find(o=>o.num&&o.num.toLowerCase().includes(q));
+    if(found){
+      // перемикаємо місяць/рік якщо треба
+      const d=new Date(found.date);
+      const y=d.getFullYear(), m=d.getMonth();
+      if(selYear!==y||selMonth!==m){
+        selYear=y; selMonth=m;
+        document.getElementById('yearSel').value=y;
+        document.getElementById('monthSel').value=m;
+        initSel();
+      }
+      // знімаємо фільтр дня щоб замовлення було видно
+      filterDay=null;
+      document.getElementById('calReset').style.display='none';
+    }
+  }
+  renderCal();renderDayBar();renderOrders();
+}
+
+function filtered(){
+  const w=document.getElementById('fWorker').value;
+  const st=document.getElementById('fStatus').value;
+  const pa=document.getElementById('fPaid').value;
+  const svc=document.getElementById('fSvc').value;
+  const q=(document.getElementById('fNum').value||'').toLowerCase();
+  const base = q.length>=2 ? orders.filter(o=>o.date.slice(0,7)===ds(selYear,selMonth,1).slice(0,7)) : monthOrders();
+  return base.filter(o=>{
+    if(q.length<2 && filterDay&&o.date!==filterDay)return false;
+    if(w&&o.op!==w)return false;
+    if(st&&o.status!==st)return false;
+    if(pa==='unpaid'&&(o.paid==='paid'||o.paid==='prepaid'))return false;
+    if(pa==='paid'&&o.paid!=='paid')return false;
+    if(pa==='prepaid'&&o.paid!=='prepaid')return false;
+    if(q&&!(o.num||'').toLowerCase().includes(q))return false;
+    if(svc&&!(o.items||[]).some(it=>it.service===svc))return false;
+    return true;
+  });
+}
+
+/* ─── PAGE NAV ─── */
+function showPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el)el.classList.add('active');
+  if(id==='report')renderReport();
+  else if(id==='workers')renderWorkers();
+  else if(id==='services')renderServices();
+  else renderOrders();
+}
+
+/* ─── RENDER ORDERS ─── */
+function renderOrders(){
+  /* update worker filter */
+  const wf=document.getElementById('fWorker');const cw=wf.value;
+  wf.innerHTML='<option value="">Всі працівники</option>';
+  workers.forEach(w=>{const o=document.createElement('option');o.value=w;o.textContent=w;if(w===cw)o.selected=true;wf.appendChild(o);});
+
+  /* update service filter */
+  const sf=document.getElementById('fSvc');const cs=sf.value;
+  const moSvcs=[...new Set(monthOrders().flatMap(o=>(o.items||[]).map(it=>it.service)))].sort();
+  sf.innerHTML='<option value="">Всі послуги</option>'+moSvcs.map(s=>`<option value="${s}" ${s===cs?'selected':''}>${s}</option>`).join('');
+
+  const list=filtered().sort((a,b)=>a.date.localeCompare(b.date));
+  const mo=monthOrders();
+
+  const totMonth=mo.reduce((s,o)=>s+oTotal(o),0);
+  const inWork=mo.filter(o=>o.status==='process'||o.status==='ready').length;
+
+  /* коли день вибраний — показуємо статистику за день, інакше — за місяць */
+  const statsBase = filterDay ? mo.filter(o=>o.date===filterDay) : mo;
+  const statLabel = filterDay ? 'за день' : 'за місяць';
+  const totStat      = statsBase.reduce((s,o)=>s+oTotal(o),0);
+  const totPaidStat  = statsBase.filter(o=>o.paid==='paid').reduce((s,o)=>s+oTotal(o),0);
+  const totPrepaidStat= statsBase.filter(o=>o.paid==='prepaid').reduce((s,o)=>s+oTotal(o),0);
+  const totUnpaidStat= statsBase.filter(o=>o.paid==='unpaid'||!o.paid).reduce((s,o)=>s+oTotal(o),0);
+
+  document.getElementById('ordSub').textContent=mLabel()+(filterDay?' · '+fmt(filterDay)+' (сума за день)':' (загальна за місяць)');
+  document.getElementById('ordStats').innerHTML=`
+    <div class="stat-card">
+      <div class="stat-label">Замовлень ${statLabel}</div>
+      <div class="stat-val">${statsBase.length}</div>
+      ${filterDay?`<div class="stat-hint">за місяць: ${mo.length}</div>`:''}
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Сума ${statLabel}</div>
+      <div class="stat-val green">${totStat.toLocaleString()} грн</div>
+      ${filterDay?`<div class="stat-hint">за місяць: ${totMonth.toLocaleString()} грн</div>`:''}
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Оплачено</div>
+      <div class="stat-val green">${totPaidStat.toLocaleString()} грн</div>
+      <div class="stat-hint">${statsBase.filter(o=>o.paid==='paid').length} замовл.</div>
+    </div>
+    ${totPrepaidStat>0?`<div class="stat-card">
+      <div class="stat-label">Передплата</div>
+      <div class="stat-val" style="color:var(--purple)">${totPrepaidStat.toLocaleString()} грн</div>
+      <div class="stat-hint">${statsBase.filter(o=>o.paid==='prepaid').length} замовл.</div>
+    </div>`:''}
+    <div class="stat-card">
+      <div class="stat-label">Неоплачено</div>
+      <div class="stat-val red">${totUnpaidStat.toLocaleString()} грн</div>
+      <div class="stat-hint">${statsBase.filter(o=>o.paid==='unpaid'||!o.paid).length} замовл.</div>
+    </div>`;
+
+  if(!list.length){
+    document.getElementById('ordBody').innerHTML=`<tr><td colspan="10" class="empty">Немає замовлень${filterDay?' за цей день':' за цей місяць'}</td></tr>`;
+    return;
+  }
+
+  let html='', curDate='', dayBuf=[];
+  const flush=()=>{
+    if(!curDate)return;
+    const dtot=dayBuf.reduce((s,o)=>s+oTotal(o),0);
+    const dunpaid=dayBuf.filter(o=>o.paid!=='paid').reduce((s,o)=>s+oTotal(o),0);
+    html+=`<tr class="dg-row">
+      <td colspan="8"><b>${fmt(curDate)}</b></td>
+      <td class="dg-sum" style="text-align:right">${dtot.toLocaleString()} грн${dunpaid>0?`<span class="dg-unpaid">не оплач: ${dunpaid.toLocaleString()} грн</span>`:''}</td>
+      <td></td>
+    </tr>`;
+    dayBuf.forEach(o=>{
+      const ri=orders.indexOf(o);
+      const tot=oTotal(o);
+      const isExp=expanded.has(ri);
+      const summary=o.items.map(it=>it.service+(it.qty>1?' ×'+it.qty:'')).join(', ');
+      const isPaid=o.paid==='paid';
+      html+=`<tr class="ord-row" onclick="toggleExp(${ri})">
+        <td style="color:var(--text3);font-size:10px;text-align:center">${isExp?'▾':'▸'}</td>
+        <td><div class="ord-num">${o.num||'—'}</div><div class="ord-date">${fmt(o.date)}${o.createdAt?'<span style="color:var(--text3);font-size:9px;display:block">⏱ '+o.createdAt+(o.deliveredAt?' → '+o.deliveredAt:'')+'</span>':''}</div></td>
+        <td style="font-size:12px;color:var(--text2);max-width:180px">${summary}</td>
+        <td style="font-size:12px">${o.op||'—'}</td>
+        <td style="font-size:12px">${o.obrobka||'—'}</td>
+        <td style="font-size:12px">${o.vydacha||'—'}</td>
+        <td><span class="badge ${SC[o.status]||'badge-new'}">${SL[o.status]||'Нове'}</span></td>
+        <td>
+          ${isPaid
+            ? `<span class="paid-badge">✓ оплачено</span>`
+            : o.paid==='prepaid' ? `<span class="prepaid-badge">передплата</span>`
+            : `<span class="unpaid-badge">✕ не оплачено</span>`}
+        </td>
+        <td class="ord-sum" style="text-align:right">${tot.toLocaleString()} грн</td>
+        <td><div class="actions">
+          ${isAdmin
+            ? `<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();editOrder(${ri})">✎</button>
+               <button class="btn btn-danger btn-xs" onclick="event.stopPropagation();delOrder(${ri})">✕</button>`
+            : `<button class="btn btn-outline btn-xs" title="Позначити оплату" onclick="event.stopPropagation();editOrder(${ri})">₴</button>`
+          }
+        </div></td>
+      </tr>`;
+      if(isExp){
+        html+=`<tr class="svc-expand-row"><td colspan="10"><div class="svc-expand-inner"><table><tbody>
+          ${o.items.map(it=>`<tr>
+            <td>${it.service}</td>
+            <td style="width:60px;color:var(--text3)">${it.qty} шт</td>
+            <td style="width:80px;color:var(--text3)">${it.price} грн</td>
+            <td style="width:90px;color:var(--green);font-weight:600">${it.total.toLocaleString()} грн</td>
+            <td></td>
+          </tr>`).join('')}
+          ${o.note?`<tr><td colspan="5" style="color:var(--text3);font-size:11px">💬 ${o.note}</td></tr>`:''}
+          ${(o.createdAt||o.deliveredAt)?`<tr><td colspan="5" style="color:var(--text3);font-size:11px">⏱ Прийнято: ${o.createdAt||'—'}${o.deliveredAt?' &nbsp;·&nbsp; ✅ Видано: '+o.deliveredAt:''}</td></tr>`:''}
+        </tbody></table></div></td></tr>`;
+      }
+    });
+    dayBuf=[];
+  };
+  list.forEach(o=>{if(o.date!==curDate){flush();curDate=o.date;}dayBuf.push(o);});
+  flush();
+  document.getElementById('ordBody').innerHTML=html;
+}
+
+function toggleExp(ri){if(expanded.has(ri))expanded.delete(ri);else expanded.add(ri);renderOrders();}
+
+/* ─── RENDER REPORT ─── */
+function renderReport(){
+  /* заповнити дропдаун днів */
+  const daySel=document.getElementById('repDayFilter');
+  const selDay=daySel?daySel.value:'';
+  const allMo=monthOrders();
+  const days=[...new Set(allMo.filter(o=>!o.internal).map(o=>o.date))].sort();
+  if(daySel){
+    const prev=daySel.value;
+    daySel.innerHTML='<option value="">Весь місяць</option>'+days.map(d=>`<option value="${d}" ${d===prev?'selected':''}>${fmt(d)}</option>`).join('');
+    daySel.value=prev;
+  }
+
+  const mo=selDay ? allMo.filter(o=>o.date===selDay) : allMo;
+
+  // Оплати що прийшли цього місяця але замовлення з іншого місяця
+  const curYM=ds(selYear,selMonth,1).slice(0,7);
+  const extraPaid=orders.filter(o=>{
+    if(!o.paidDate||(o.paid!=='paid'&&o.paid!=='prepaid'))return false;
+    if(o.paidDate.slice(0,7)!==curYM)return false;
+    if(o.date.slice(0,7)===curYM)return false; // вже в mo
+    return true;
+  });
+
+  const totAll=mo.filter(o=>!o.internal).reduce((s,o)=>s+oTotal(o),0);
+  const totPaid=[...mo,...extraPaid].filter(o=>o.paid==='paid'||o.paid==='prepaid').reduce((s,o)=>s+oTotal(o),0);
+  const totPrepaid=mo.filter(o=>o.paid==='prepaid'&&!o.internal).reduce((s,o)=>s+oTotal(o),0);
+  const totUnpaid=mo.filter(o=>o.paid!=='paid'&&o.paid!=='prepaid'&&!o.internal).reduce((s,o)=>s+oTotal(o),0);
+  const cntDone=mo.filter(o=>o.status==='done').length;
+
+  document.getElementById('repSub').textContent=mLabel()+' · '+mo.filter(o=>!o.internal).length+' замовлень';
+
+  const allSvcs=[...new Set(mo.filter(o=>!o.internal).flatMap(o=>(o.items||[]).map(it=>it.service)))];
+
+  const DOC_SVC_KEYS=['фото на doc','фото на doc з носія','фото на doc з носія цифровий варіант','фото на документи','фото на документи з носія / цифровий варіант'];
+  function isDocSvc(s){if(!s)return false;const sl=s.toLowerCase();return sl.includes('фото на doc')||sl.includes('фото на документи');}
+  function isRetush(s){if(!s)return false;return s.toLowerCase().includes('ретуш');}
+  function isScan(s){if(!s)return false;return s.toLowerCase().includes('скан');}
+  function isMoneysSvc(s){return isRetush(s)||isScan(s);}
+
+  const wd={};
+  workers.forEach((w,i)=>{wd[w]={name:w,c:AVC[i%AVC.length],acc:0,proc:0,iss:0,issSum:0,days:new Set(),
+    svcOp:{},svcOpSum:{},
+    svcProc:{},svcProcSum:{},
+    svcIss:{},svcIssSum:{},
+    earnOp:0,earnProc:0,earnIss:0,
+    internalSum:0,internalSvcs:{}};});
+
+  mo.forEach(o=>{
+    const tot=oTotal(o);
+    const done=o.status==='done';
+    const items=o.items||[];
+    if(o.internal){
+      const iw=o.internalWorker||o.op;
+      if(iw&&wd[iw]){
+        wd[iw].internalSum+=tot;
+        items.forEach(it=>{wd[iw].internalSvcs[it.service]=(wd[iw].internalSvcs[it.service]||0)+it.qty;});
+      }
+      return;
+    }
+    if(o.op&&wd[o.op]){
+      wd[o.op].acc++;wd[o.op].days.add(o.date);
+      items.forEach(it=>{
+        wd[o.op].svcOp[it.service]=(wd[o.op].svcOp[it.service]||0)+it.qty;
+        if(isMoneysSvc(it.service)) wd[o.op].svcOpSum[it.service]=(wd[o.op].svcOpSum[it.service]||0)+(it.total||it.qty*(it.price||0));
+      });
+    }
+    if(o.obrobka&&wd[o.obrobka]){
+      wd[o.obrobka].proc++;wd[o.obrobka].days.add(o.date);
+      items.forEach(it=>{
+        wd[o.obrobka].svcProc[it.service]=(wd[o.obrobka].svcProc[it.service]||0)+it.qty;
+        if(isMoneysSvc(it.service)) wd[o.obrobka].svcProcSum[it.service]=(wd[o.obrobka].svcProcSum[it.service]||0)+(it.total||it.qty*(it.price||0));
+      });
+    }
+    if(o.vydacha&&wd[o.vydacha]){
+      wd[o.vydacha].iss++;wd[o.vydacha].days.add(o.date);
+      if(done){
+        const nonDocSum=items.filter(it=>!isDocSvc(it.service)).reduce((s,it)=>s+(it.total||it.qty*(it.price||0)),0);
+        wd[o.vydacha].issSum+=nonDocSum;
+        wd[o.vydacha].earnIss+=nonDocSum;
+        items.forEach(it=>{
+          wd[o.vydacha].svcIss[it.service]=(wd[o.vydacha].svcIss[it.service]||0)+it.qty;
+          if(isMoneysSvc(it.service)) wd[o.vydacha].svcIssSum[it.service]=(wd[o.vydacha].svcIssSum[it.service]||0)+(it.total||it.qty*(it.price||0));
+        });
+      }
+    }
+  });
+
+  /* ефективність = видані замовлення / робочі дні */
+  const maxEff=Math.max(...Object.values(wd).map(w=>w.days.size>0?w.iss/w.days.size:0),1);
+  const maxDays=Math.max(...Object.values(wd).map(w=>w.days.size),1);
+
+  const wHtml=Object.values(wd).map(w=>{
+    let svcTable='';
+    if(allSvcs.length){
+      function svcCell(s,qty,sum){
+        if(!qty)return`<td class="svc-td">—</td>`;
+        if(isMoneysSvc(s)) return`<td class="svc-td"><span style="font-weight:700;color:var(--green)">${sum.toLocaleString()} грн</span></td>`;
+        return`<td class="svc-td"><span style="font-weight:600">${qty} шт.</span></td>`;
+      }
+      const heads=allSvcs.map(s=>`<th class="svc-th">${s}</th>`).join('');
+      const roles=[
+        {label:'Прийняв', qty:w.svcOp,   sum:{}, money:false},
+        {label:'Обробив', qty:w.svcProc, sum:{}, money:false},
+        {label:'Видав',   qty:w.svcIss,  sum:w.svcIssSum, money:true},
+      ];
+      const rows=roles.map(r=>{
+        if(!allSvcs.some(s=>r.qty[s]))return'';
+        const cells=allSvcs.map(s=>{
+          const qty=r.qty[s]||0;
+          if(!qty)return`<td class="svc-td">—</td>`;
+          if(r.money&&isMoneysSvc(s)){
+            const sm=r.sum[s]||0;
+            return`<td class="svc-td"><span style="font-weight:700;color:var(--green)">${sm.toLocaleString()} грн</span></td>`;
+          }
+          return`<td class="svc-td"><span style="font-weight:600">${qty} шт.</span></td>`;
+        }).join('');
+        return`<tr><td class="svc-role">${r.label}</td>${cells}</tr>`;
+      }).filter(Boolean).join('');
+      if(rows) svcTable=`<div style="overflow-x:auto;padding:0 15px 12px"><table class="svc-breakdown"><thead><tr><th class="svc-th" style="text-align:left;color:var(--text3)">Роль</th>${heads}</tr></thead><tbody>${rows}</tbody></table></div>`;
+    }
+    let intBlock='';
+    if(w.internalSum>0){
+      const intSvcs=Object.entries(w.internalSvcs).map(([s,q])=>`${s}: ${q} шт.`).join(', ');
+      intBlock=`<div class="deduct-row" style="padding:8px 15px;border-top:1px solid var(--border);font-size:12px;display:flex;align-items:center;flex-wrap:wrap;gap:6px">
+        <span class="int-badge">внутрішнє</span>
+        <span style="color:var(--text2)">${intSvcs}</span>
+        <span style="margin-left:auto;color:var(--red);font-weight:700">−${w.internalSum.toLocaleString()} грн з зарплати</span>
+      </div>`;
+    }
+    const totalEarned=w.earnIss;
+    const eff=w.days.size>0?(w.iss/w.days.size).toFixed(1):0;
+    const effPct=Math.round((w.days.size>0?w.iss/w.days.size:0)/maxEff*100);
+    const daysPct=Math.round(w.days.size/maxDays*100);
+    return `<div class="wb">
+      <div class="wb-head">
+        <div class="ava ${w.c}">${w.name[0]}</div>
+        <div class="wb-name">${w.name}<span class="wb-days">${w.days.size} дн.</span></div>
+        <span style="font-size:11px;color:var(--text3);margin-right:10px">${w.acc+w.proc+w.iss} дій</span>
+        <span class="wb-total">${totalEarned?totalEarned.toLocaleString()+' грн':'—'}</span>
+      </div>
+      <div style="padding:6px 15px 4px;display:flex;flex-direction:column;gap:5px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px">
+          <span style="color:var(--text3);width:90px">Робочих днів</span>
+          <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${daysPct}%;background:var(--blue);border-radius:3px;transition:width .4s"></div>
+          </div>
+          <span style="color:var(--text2);width:30px;text-align:right">${w.days.size}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px">
+          <span style="color:var(--text3);width:90px">Ефективність</span>
+          <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${effPct}%;background:var(--green);border-radius:3px;transition:width .4s"></div>
+          </div>
+          <span style="color:var(--green);width:30px;text-align:right;font-weight:700">${eff}</span>
+        </div>
+      </div>
+      <div class="wb-stats">
+        <div class="wb-stat"><div class="wb-stat-label">Прийняв</div><div class="wb-stat-val">${w.acc}</div></div>
+        <div class="wb-stat"><div class="wb-stat-label">Обробив</div><div class="wb-stat-val">${w.proc}</div></div>
+        <div class="wb-stat"><div class="wb-stat-label">Видав</div><div class="wb-stat-val">${w.iss}</div><div class="wb-stat-sum">${w.issSum?w.issSum.toLocaleString()+' грн':'—'}</div></div>
+      </div>
+      ${svcTable}${intBlock}
+    </div>`;
+  }).join('');
+
+  const intOrders=mo.filter(o=>o.internal);
+  const intTotal=intOrders.reduce((s,o)=>s+oTotal(o),0);
+  const intHtml=intOrders.length?intOrders.map(o=>{
+    const iw=o.internalWorker||o.op||'—';
+    const svcs=(o.items||[]).map(it=>`${it.service}×${it.qty}`).join(', ');
+    return `<tr><td class="ms-label">${o.date}</td><td class="ms-label">${iw}</td><td class="ms-label">${svcs}</td><td class="ms-val red">−${oTotal(o).toLocaleString()} грн</td></tr>`;
+  }).join(''):'<tr><td colspan="4" class="ms-label" style="text-align:center;padding:12px;color:var(--text3)">Немає внутрішніх замовлень за цей місяць</td></tr>';
+
+  document.getElementById('repContent').innerHTML=`
+    <div class="report-block">
+      <div class="rb-title">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        По працівниках — ${mLabel()}
+        <span class="rb-note">Сума — замовлення зі статусом «Видано»</span>
+      </div>
+      ${wHtml||'<div class="empty">Немає даних</div>'}
+    </div>
+
+    <div class="report-block">
+      <div class="rb-title" style="color:var(--amber)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 3v4M8 3v4"/></svg>
+        Внутрішні замовлення — списати з зарплати
+        <span class="rb-note">${intTotal?'−'+intTotal.toLocaleString()+' грн загалом':''}</span>
+      </div>
+      <table class="ms-table" style="width:100%">
+        <tr style="background:var(--bg3)">
+          <td class="ms-label" style="font-weight:700">Дата</td>
+          <td class="ms-label" style="font-weight:700">Працівник</td>
+          <td class="ms-label" style="font-weight:700">Послуги</td>
+          <td class="ms-val" style="font-weight:700">Сума</td>
+        </tr>
+        ${intHtml}
+      </table>
+    </div>
+
+    <div class="report-block">
+      <div class="rb-title">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+        Загальний підсумок — ${mLabel()}
+      </div>
+      <table class="ms-table" style="width:100%">
+        <tr><td class="ms-label">Всього замовлень</td><td class="ms-val">${mo.filter(o=>!o.internal).length}</td></tr>
+        <tr><td class="ms-label">Видано</td><td class="ms-val">${cntDone}</td></tr>
+        <tr><td class="ms-label">В роботі / готово</td><td class="ms-val amber">${mo.filter(o=>(o.status==='process'||o.status==='ready')&&!o.internal).length}</td></tr>
+        <tr><td class="ms-label" style="height:8px;border:none"></td><td></td></tr>
+        <tr><td class="ms-label">Сума за місяць</td><td class="ms-val green" style="font-size:18px">${totAll.toLocaleString()} грн</td></tr>
+        <tr><td class="ms-label">Оплачено (вкл. оплати з ін. місяців)</td><td class="ms-val green">${totPaid.toLocaleString()} грн</td></tr>
+        ${totPrepaid>0?`<tr><td class="ms-label">Передплата</td><td class="ms-val" style="color:var(--purple)">${totPrepaid.toLocaleString()} грн (${mo.filter(o=>o.paid==='prepaid').length} замовл.)</td></tr>`:''}
+        <tr><td class="ms-label">Неоплачено</td><td class="ms-val red">${totUnpaid.toLocaleString()} грн (${mo.filter(o=>o.paid!=='paid'&&o.paid!=='prepaid'&&!o.internal).length} замовл.)</td></tr>
+        ${intTotal?`<tr class="deduct-row"><td class="ms-label">Списати з зарплат (внутрішні)</td><td class="ms-val red">−${intTotal.toLocaleString()} грн</td></tr>`:''}
+      </table>
+    </div>
+
+    <div class="report-block">
+      <div class="rb-title">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Ефективність працівників — ${mLabel()}
+        <span class="rb-note">видано замовлень ÷ робочих днів</span>
+      </div>
+      <div style="padding:14px 16px;display:flex;flex-direction:column;gap:14px">
+        ${Object.values(wd).sort((a,b)=>{
+          const ea=a.days.size>0?a.iss/a.days.size:0;
+          const eb=b.days.size>0?b.iss/b.days.size:0;
+          return eb-ea;
+        }).map((w,rank)=>{
+          const eff=w.days.size>0?(w.iss/w.days.size):0;
+          const effPct=Math.round(eff/maxEff*100);
+          const daysPct=Math.round(w.days.size/maxDays*100);
+          const medal=rank===0?'🥇':rank===1?'🥈':rank===2?'🥉':'';
+          return`<div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+              <div class="ava ${w.c}" style="width:26px;height:26px;font-size:11px;flex-shrink:0">${w.name[0]}</div>
+              <span style="font-size:13px;font-weight:600">${medal} ${w.name}</span>
+              <span style="margin-left:auto;font-size:12px;color:var(--text3)">${w.days.size} дн. · ${w.iss} видано</span>
+              <span style="font-size:15px;font-weight:700;color:var(--green);min-width:36px;text-align:right">${eff.toFixed(1)}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text3);margin-bottom:3px">
+              <span style="width:70px">Дні роботи</span>
+              <div style="flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden">
+                <div style="height:100%;width:${daysPct}%;background:var(--blue);border-radius:3px"></div>
+              </div>
+              <span style="width:20px;text-align:right">${w.days.size}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text3)">
+              <span style="width:70px">Ефективність</span>
+              <div style="flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden">
+                <div style="height:100%;width:${effPct}%;background:${rank===0?'var(--green)':'var(--blue)'};border-radius:3px"></div>
+              </div>
+              <span style="width:20px;text-align:right;color:${rank===0?'var(--green)':'var(--text2)'};font-weight:700">${eff.toFixed(1)}</span>
+            </div>
+          </div>`;
+        }).join('<div style="height:1px;background:var(--border)"></div>')}
+      </div>
+    </div>`;
+}
+
+
+/* ─── WORKERS / SERVICES ─── */
+function renderWorkers(){
+  document.getElementById('workersList').innerHTML=workers.length
+    ?workers.map((w,i)=>`<div class="worker-row">
+        <div class="ava ${AVC[i%AVC.length]}">${w[0]}</div>
+        <div class="wr-name">${w}</div>
+        <button class="btn btn-danger btn-sm" onclick="delWorker(${i})">Видалити</button>
+      </div>`).join('')
+    :'<div class="empty">Немає працівників</div>';
+}
+function renderServices(){
+  document.getElementById('svcList').innerHTML=services.length
+    ?services.map((s,i)=>`<div class="svc-card">
+        <div><div class="svc-n">${s.name}</div><div class="svc-u">за одиницю</div></div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="svc-p" id="svcP_${i}">${s.price} грн</div>
+          <button class="btn btn-outline btn-sm" onclick="editSvcPrice(${i})" title="Змінити ціну">✎</button>
+          <button class="btn btn-danger btn-sm" onclick="delService(${i})">✕</button>
+        </div>
+      </div>`).join('')
+    :'<div class="empty">Немає послуг</div>';
+}
+function editSvcPrice(i){
+  const s=services[i];
+  const newP=prompt(`Нова ціна для "${s.name}":`, s.price);
+  if(newP===null)return;
+  const p=+newP;
+  if(!p||p<0){alert('Невірна ціна');return;}
+  services[i].price=p;
+  persist();renderServices();
+}
+function renderAll(){renderCal();renderDayBar();renderOrders();renderWorkers();renderServices();}
+
+/* ─── MODAL MULTI-SERVICE ─── */
+function addSvcLine(item){
+  const def=services[0]||{name:'',price:0};
+  modalItems.push(item?{...item}:{service:def.name,qty:1,price:def.price,total:def.price});
+  renderSvcLines();
+}
+function renderSvcLines(){
+  document.getElementById('msvcBody').innerHTML=modalItems.map((it,i)=>`
+    <div class="msvc-row">
+      <div class="mc"><select onchange="onSC(${i},this.value)">
+        ${services.map(s=>`<option value="${s.name}"${s.name===it.service?' selected':''}>${s.name}</option>`).join('')}
+      </select></div>
+      <div class="mc"><input type="number" min="1" value="${it.qty}" oninput="onQC(${i},this.value)"></div>
+      <div class="mc"><input type="number" min="0" value="${it.price}" oninput="onPC(${i},this.value)"></div>
+      <div class="mc-sum">${(it.total||0).toLocaleString()}</div>
+      <button class="mc-del" onclick="delSvcLine(${i})">×</button>
+    </div>`).join('');
+  const g=modalItems.reduce((s,it)=>s+(it.total||0),0);
+  document.getElementById('msvcGrand').textContent='Разом: '+g.toLocaleString()+' грн';
+}
+function onSC(i,v){modalItems[i].service=v;const s=services.find(x=>x.name===v);if(s){modalItems[i].price=s.price;modalItems[i].total=(modalItems[i].qty||1)*s.price;}renderSvcLines();}
+function onQC(i,v){modalItems[i].qty=+v||1;modalItems[i].total=modalItems[i].qty*(modalItems[i].price||0);renderSvcLines();}
+function onPC(i,v){modalItems[i].price=+v||0;modalItems[i].total=(modalItems[i].qty||1)*modalItems[i].price;renderSvcLines();}
+function delSvcLine(i){if(modalItems.length<=1){alert('Потрібна хоча б одна послуга');return;}modalItems.splice(i,1);renderSvcLines();}
+
+function popWorkers(){
+  ['mOP','mVyd'].forEach(id=>{document.getElementById(id).innerHTML=workers.map(w=>`<option value="${w}">${w}</option>`).join('');});
+  document.getElementById('mObrob').innerHTML='<option value="">—</option>'+workers.map(w=>`<option value="${w}">${w}</option>`).join('');
+}
+
+function unlockModalFields(){
+  const lockIds=['mDate','mNum','mOP','mObrob','mVyd','mStatus','mNote','mCreatedAt','mDeliveredAt','mInternal','mInternalWorker'];
+  lockIds.forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=false;});
+  document.querySelector('.msvc-wrap').style.pointerEvents='';
+  document.querySelector('.msvc-wrap').style.opacity='1';
+  const addBtn=document.getElementById('ordModal').querySelector('[onclick="addSvcLine()"]');
+  if(addBtn)addBtn.style.display='';
+  const hint=document.getElementById('nonAdminHint');
+  if(hint)hint.style.display='none';
+}
+
+function openAddOrder(){
+  editIdx=null;
+  unlockModalFields();
+  document.getElementById('ordModalTitle').textContent='Нове замовлення';
+  popWorkers();
+  document.getElementById('mDate').value=filterDay||new Date().toISOString().slice(0,10);
+  document.getElementById('mNum').value='';
+  document.getElementById('mNote').value='';
+  document.getElementById('mStatus').value='new';
+  document.getElementById('mPaid').value='unpaid';
+  document.getElementById('mInternal').checked=false;
+  toggleInternal();
+  const now=new Date();const hh=String(now.getHours()).padStart(2,'0');const mm=String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('mCreatedAt').value=hh+':'+mm;
+  document.getElementById('mDeliveredAt').value='';
+  modalItems=[];addSvcLine();
+  document.getElementById('ordModal').classList.add('open');
+}
+function editOrder(idx){
+  editIdx=idx;const o=orders[idx];
+  document.getElementById('ordModalTitle').textContent= isAdmin ? 'Редагувати замовлення' : 'Замовлення';
+  popWorkers();
+  document.getElementById('mDate').value=o.date;
+  document.getElementById('mNum').value=o.num||'';
+  document.getElementById('mOP').value=o.op||workers[0]||'';
+  document.getElementById('mObrob').value=o.obrobka||'';
+  document.getElementById('mVyd').value=o.vydacha||workers[0]||'';
+  document.getElementById('mStatus').value=o.status||'new';
+  document.getElementById('mPaid').value=o.paid||'unpaid';
+  document.getElementById('mPaidDate').value=o.paidDate||'';
+  togglePaidDate();
+  document.getElementById('mNote').value=o.note||'';
+  document.getElementById('mCreatedAt').value=o.createdAt||'';
+  document.getElementById('mDeliveredAt').value=o.deliveredAt||'';
+  document.getElementById('mInternal').checked=!!o.internal;
+  toggleInternal();
+  if(o.internalWorker)document.getElementById('mInternalWorker').value=o.internalWorker;
+  modalItems=(o.items||[]).map(it=>({...it}));
+  if(!modalItems.length)addSvcLine();
+  renderSvcLines();
+
+  /* блокуємо поля для не-адміна */
+  const lockIds=['mNum','mOP','mObrob','mVyd','mStatus','mNote','mCreatedAt','mDeliveredAt','mInternal','mInternalWorker'];
+  lockIds.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.disabled=!isAdmin;}
+  });
+  /* дата замовлення і дата оплати — доступні всім */
+  document.getElementById('mDate').disabled=false;
+  document.getElementById('mPaidDate').disabled=false;
+  /* блокуємо кнопки послуг */
+  document.querySelector('.msvc-wrap').style.pointerEvents=isAdmin?'':'none';
+  document.querySelector('.msvc-wrap').style.opacity=isAdmin?'1':'0.5';
+  document.getElementById('ordModal').querySelector('[onclick="addSvcLine()"]').style.display=isAdmin?'':'none';
+
+  /* підказка для не-адміна */
+  let hint=document.getElementById('nonAdminHint');
+  if(!hint){
+    hint=document.createElement('div');
+    hint.id='nonAdminHint';
+    hint.style.cssText='font-size:12px;color:var(--amber);background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:8px;padding:8px 12px;margin-bottom:10px';
+    document.getElementById('mPaid').closest('.fg').parentElement.before(hint);
+  }
+  hint.style.display=isAdmin?'none':'block';
+  hint.textContent='⚠ Ви можете змінити дату замовлення та статус оплати';
+
+  document.getElementById('ordModal').classList.add('open');
+}
+function togglePaidDate(){
+  const paid=document.getElementById('mPaid').value;
+  const row=document.getElementById('paidDateRow');
+  row.style.display=(paid==='paid'||paid==='prepaid')?'':'none';
+  if(paid==='paid'||paid==='prepaid'){
+    if(!document.getElementById('mPaidDate').value)
+      document.getElementById('mPaidDate').value=new Date().toISOString().slice(0,10);
+  }
+}
+function toggleInternal(){
+  const on=document.getElementById('mInternal').checked;
+  const sel=document.getElementById('mInternalWorker');
+  sel.style.display=on?'':'none';
+  if(on){
+    const internalList=[ADMIN_NAME,...workers];
+    sel.innerHTML=internalList.map(w=>`<option value="${w}">${w}</option>`).join('');
+  }
+}
+
+function saveOrder(){
+  if(!isAdmin && editIdx!==null){
+    const paid=document.getElementById('mPaid').value;
+    const newDate=document.getElementById('mDate').value;
+    const prev=orders[editIdx];
+    let paidDate=document.getElementById('mPaidDate').value||'';
+    if(paid==='unpaid') paidDate='';
+    orders[editIdx]={...prev, date:newDate, paid, paidDate};
+    persist();closeOrdModal();renderCal();renderDayBar();renderOrders();
+    return;
+  }
+  if(!modalItems.length){alert('Додайте послугу');return;}
+  const date=document.getElementById('mDate').value;
+  if(!date){alert('Вкажіть дату');return;}
+  const paid=document.getElementById('mPaid').value;
+  // якщо оплата змінилась на "paid" або "prepaid" — фіксуємо дату оплати
+  let paidDate='';
+  if(editIdx!==null){
+    const prev=orders[editIdx];
+    if((paid==='paid'||paid==='prepaid')&&prev.paid!==paid){
+      paidDate=new Date().toISOString().slice(0,10);
+    } else {
+      paidDate=prev.paidDate||'';
+    }
+  } else if(paid==='paid'||paid==='prepaid'){
+    paidDate=new Date().toISOString().slice(0,10);
+  }
+  const createdAt=document.getElementById('mCreatedAt').value;
+  const deliveredAt=document.getElementById('mDeliveredAt').value;
+  const o={
+    date,num:document.getElementById('mNum').value.trim(),
+    items:modalItems.map(it=>({...it})),
+    op:document.getElementById('mOP').value,
+    obrobka:document.getElementById('mObrob').value,
+    vydacha:document.getElementById('mVyd').value,
+    status:document.getElementById('mStatus').value,
+    paid,paidDate,
+    createdAt,deliveredAt,
+    internal:document.getElementById('mInternal').checked,
+    internalWorker:document.getElementById('mInternalWorker').value,
+    note:document.getElementById('mNote').value
+  };
+  if(editIdx!==null)orders[editIdx]=o;else orders.push(o);
+  persist();closeOrdModal();renderCal();renderDayBar();renderOrders();
+}
+function transferOrder(idx){
+  const o=orders[idx];
+  if(o.paid==='paid'){alert('Оплачене замовлення не можна переносити');return;}
+  // показати міні-модалку з вибором дати
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:flex;align-items:center;justify-content:center';
+  overlay.innerHTML=`
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px 20px;width:280px;text-align:center">
+      <div style="font-size:14px;font-weight:700;margin-bottom:6px">Перенести замовлення</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Поточна дата: <b>${fmt(o.date)}</b></div>
+      <input type="date" id="transferDatePick" value="${o.date}"
+        style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px;margin-bottom:14px">
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="flex:1" onclick="
+          const d=document.getElementById('transferDatePick').value;
+          if(!d){alert('Оберіть дату');return;}
+          orders[${idx}]={...orders[${idx}],date:d};
+          persist();renderCal();renderDayBar();renderOrders();
+          document.body.removeChild(this.closest('[style*=fixed]'));
+        ">Перенести</button>
+        <button class="btn btn-outline" style="flex:1" onclick="document.body.removeChild(this.closest('[style*=fixed]'))">Скасувати</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(()=>document.getElementById('transferDatePick').focus(),50);
+}
+function delOrder(idx){if(!confirm('Видалити замовлення?'))return;orders.splice(idx,1);persist();renderCal();renderDayBar();renderOrders();}
+function closeOrdModal(){document.getElementById('ordModal').classList.remove('open');unlockModalFields();}
+
+function openAddService(){document.getElementById('sName').value='';document.getElementById('sPrice').value='';document.getElementById('svcModal').classList.add('open');}
+function closeSvcModal(){document.getElementById('svcModal').classList.remove('open');}
+function saveService(){const n=document.getElementById('sName').value.trim();const p=+document.getElementById('sPrice').value;if(!n||!p){alert('Вкажіть назву та ціну');return;}services.push({name:n,price:p});persist();closeSvcModal();renderServices();}
+function delService(i){if(!confirm('Видалити?'))return;services.splice(i,1);persist();renderServices();}
+function resetServices(){
+  if(!confirm('Замінити поточний список послуг на актуальний? Ціни будуть скинуті до стандартних.'))return;
+  services=[
+    {name:'фото на документи',price:200},
+    {name:'фото на документи з носія / цифровий варіант',price:170},
+    {name:'фото на візу США / грін карту',price:230},
+    {name:'ретуш',price:100},
+    {name:'фото 10х15',price:12},
+    {name:'фото 10х15 терм',price:24},
+    {name:'фото 13х18',price:20},
+    {name:'фото 13х18 терм',price:40},
+    {name:'фото 15х21',price:25},
+    {name:'фото 15х21 терм',price:50},
+    {name:'фото 21х30',price:50},
+    {name:'фото 21х30 терм',price:100},
+    {name:'фото 30х40',price:100},
+    {name:'фото 30х40 терм',price:200},
+    {name:'виготовлення візиток',price:500},
+    {name:'чашка біла',price:250},
+    {name:'чашка кольорова',price:300},
+    {name:'чашка хамелеон',price:350},
+    {name:'футболка',price:700},
+    {name:'виготовлення холста',price:700},
+    {name:'оцифровка',price:240},
+  {name:'скан',price:10},
+    {name:'акція вихідного дня 10х15',price:10}
+  ];
+  persist();renderServices();
+}
+
+function openAddWorker(){document.getElementById('wName').value='';document.getElementById('wrkModal').classList.add('open');}
+function closeWrkModal(){document.getElementById('wrkModal').classList.remove('open');}
+function saveWorker(){const n=document.getElementById('wName').value.trim();if(!n){alert('Введіть ім\'я');return;}workers.push(n);persist();closeWrkModal();renderWorkers();}
+function delWorker(i){if(!confirm('Видалити?'))return;workers.splice(i,1);persist();renderWorkers();}
+
+function exportCSV(){
+  const mo=monthOrders();if(!mo.length){alert('Немає даних');return;}
+  const rows=[['Дата','Номер','Послуга','К-сть','Ціна','Сума','ОП','Обробка','Видача','Статус','Оплата','Примітка']];
+  mo.forEach(o=>(o.items||[]).forEach(it=>rows.push([o.date,o.num,it.service,it.qty,it.price,it.total,o.op,o.obrobka,o.vydacha,SL[o.status]||'',o.paid==='paid'?'Оплачено':'Не оплачено',o.note||''])));
+  const csv=rows.map(r=>r.map(c=>'"'+(c||'').toString().replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download='звіт_'+MN[selMonth]+'_'+selYear+'.csv';a.click();
+}
+
+/* ─── DEMO (дані з PDF: 1 та 2 травня) ─── */
+const demo=[
+  /* ──── 1 травня ──── */
+  // без номера: оцифровка
+  {date:'2026-05-01',num:'',items:[{service:'оцифровка',qty:1,price:240,total:240}],op:'Карплюк',obrobka:'',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  // 137022
+  {date:'2026-05-01',num:'137022',items:[{service:'оцифровка',qty:1,price:240,total:240}],op:'Харченко',obrobka:'',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  // 137027: оцифровка + 21х30 + ретуш
+  {date:'2026-05-01',num:'137027',items:[{service:'оцифровка',qty:1,price:240,total:240},{service:'21x30',qty:1,price:50,total:50},{service:'ретуш',qty:1,price:150,total:150}],op:'Харченко',obrobka:'Карплюк',vydacha:'Харченко',status:'done',paid:'paid',note:''},
+  // 134374
+  {date:'2026-05-01',num:'134374',items:[{service:'фото на документи',qty:1,price:170,total:170}],op:'Карплюк',obrobka:'Карплюк',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  // 134397
+  {date:'2026-05-01',num:'134397',items:[{service:'фото на документи',qty:1,price:200,total:200}],op:'Харченко',obrobka:'Карплюк',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  // 134375
+  {date:'2026-05-01',num:'134375',items:[{service:'фото на документи',qty:1,price:200,total:200}],op:'Карплюк',obrobka:'Карплюк',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  // 1343756
+  {date:'2026-05-01',num:'1343756',items:[{service:'фото на документи',qty:1,price:200,total:200}],op:'Карплюк',obrobka:'Карплюк',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  // 134377 + 21х30 × 2
+  {date:'2026-05-01',num:'134377',items:[{service:'фото на документи',qty:1,price:170,total:170},{service:'21x30',qty:2,price:50,total:100}],op:'Карплюк',obrobka:'Карплюк',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  // 134378
+  {date:'2026-05-01',num:'134378',items:[{service:'фото на документи',qty:1,price:200,total:200}],op:'Карплюк',obrobka:'Карплюк',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  // 134416
+  {date:'2026-05-01',num:'134416',items:[{service:'фото на документи',qty:1,price:200,total:200}],op:'Харченко',obrobka:'Карплюк',vydacha:'Харченко',status:'done',paid:'paid',note:''},
+  // 134415
+  {date:'2026-05-01',num:'134415',items:[{service:'фото на документи',qty:1,price:170,total:170}],op:'Харченко',obrobka:'Харченко',vydacha:'Харченко',status:'done',paid:'paid',note:''},
+  // 137093: 10х15 × 36
+  {date:'2026-05-01',num:'137093',items:[{service:'10x15',qty:36,price:17,total:612}],op:'Карплюк',obrobka:'',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  // 134379 + ретуш
+  {date:'2026-05-01',num:'134379',items:[{service:'фото на документи',qty:1,price:200,total:200},{service:'ретуш',qty:1,price:300,total:300}],op:'Карплюк',obrobka:'Карплюк',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  // без номера: скан × 13
+  {date:'2026-05-01',num:'',items:[{service:'скан',qty:13,price:10,total:130}],op:'Харченко',obrobka:'',vydacha:'Харченко',status:'done',paid:'paid',note:''},
+  // 134380
+  {date:'2026-05-01',num:'134380',items:[{service:'фото на документи',qty:2,price:170,total:340}],op:'Карплюк',obrobka:'Карплюк',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  // без номера: цитадель 15х21 + 10х15
+  {date:'2026-05-01',num:'',items:[{service:'15x21',qty:1,price:25,total:25},{service:'10x15',qty:1,price:12,total:12}],op:'Харченко',obrobka:'',vydacha:'Карплюк',status:'done',paid:'paid',note:'цитадель'},
+  // 134414
+  {date:'2026-05-01',num:'134414',items:[{service:'фото на документи',qty:1,price:170,total:170}],op:'Харченко',obrobka:'Харченко',vydacha:'Харченко',status:'done',paid:'paid',note:''},
+  // 136921
+  {date:'2026-05-01',num:'136921',items:[{service:'13x18',qty:1,price:40,total:40}],op:'Харченко',obrobka:'',vydacha:'Харченко',status:'done',paid:'paid',note:''},
+  // 134381
+  {date:'2026-05-01',num:'134381',items:[{service:'фото на документи',qty:1,price:200,total:200}],op:'Карплюк',obrobka:'Карплюк',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  // 136968: 15х21 × 3
+  {date:'2026-05-01',num:'136968',items:[{service:'15x21',qty:3,price:50,total:150}],op:'Харченко',obrobka:'',vydacha:'Харченко',status:'done',paid:'paid',note:''},
+  // 134548
+  {date:'2026-05-01',num:'134548',items:[{service:'фото на документи',qty:1,price:200,total:200}],op:'Карплюк',obrobka:'Карплюк',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  // 137094: 21х30 × 3
+  {date:'2026-05-01',num:'137094',items:[{service:'21x30',qty:3,price:50,total:150}],op:'Карплюк',obrobka:'',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  // 134549
+  {date:'2026-05-01',num:'134549',items:[{service:'фото на документи',qty:1,price:170,total:170}],op:'Карплюк',obrobka:'Карплюк',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  // 134413
+  {date:'2026-05-01',num:'134413',items:[{service:'фото на документи',qty:1,price:200,total:200}],op:'Харченко',obrobka:'Харченко',vydacha:'Харченко',status:'done',paid:'paid',note:''},
+  // без номера: скан 1 × 220
+  {date:'2026-05-01',num:'',items:[{service:'скан',qty:1,price:220,total:220}],op:'Карплюк',obrobka:'',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  // 134550
+  {date:'2026-05-01',num:'134550',items:[{service:'фото на документи',qty:1,price:200,total:200}],op:'Карплюк',obrobka:'Харченко',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  // 134547
+  {date:'2026-05-01',num:'134547',items:[{service:'фото на документи',qty:1,price:200,total:200}],op:'Карплюк',obrobka:'Карплюк',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  // без номера: 10х15 × 1 = 24 грн
+  {date:'2026-05-01',num:'',items:[{service:'10x15',qty:1,price:24,total:24}],op:'Карплюк',obrobka:'',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  // 136906: 15х21 × 5
+  {date:'2026-05-01',num:'136906',items:[{service:'15x21',qty:5,price:25,total:125}],op:'Карплюк',obrobka:'',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+
+  /* ──── 2 травня ──── */
+  // 134551
+  {date:'2026-05-02',num:'134551',items:[{service:'фото на документи',qty:1,price:200,total:200}],op:'Карплюк',obrobka:'Карплюк',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  // 1377096: 13х18 × 2
+  {date:'2026-05-02',num:'1377096',items:[{service:'13x18',qty:2,price:20,total:40}],op:'Карплюк',obrobka:'',vydacha:'Карплюк',status:'done',paid:'paid',note:''},
+  {date:'2026-05-02',num:'136922',items:[{service:'21x30',qty:2,price:50,total:100}],op:'Харченко',obrobka:'',vydacha:'Харченко',status:'done',paid:'paid',note:''},
+];
+// demo loaded in init if needed
+
+async function init(){
+  const loaded = await loadCloud();
+  if(!loaded && !orders.length){orders=demo; await persist();}
+  else if(!orders.length){orders=demo; await persist();}
+  migrate(); initSel(); renderAll();
+  if(_syncActive) setInterval(syncPoll, 8000);
+  else setSyncLabel('⚙ вкажіть Firebase config');
+}
+init();
+</script>
+<!-- ADMIN LOGIN MODAL -->
+<div id="adminOverlay" class="admin-overlay" style="display:none">
+  <div class="admin-box">
+    <h2>🔐 Вхід для адміна</h2>
+    <p>Введіть пароль для доступу до звіту</p>
+    <input type="password" id="adminPwdInput" placeholder="••••" onkeydown="if(event.key==='Enter')checkAdminPwd()">
+    <div class="err" id="adminErr"></div>
+    <button class="btn" onclick="checkAdminPwd()" style="width:100%">Увійти</button>
+    <div style="margin-top:10px;font-size:12px;color:var(--text3);cursor:pointer" onclick="closeAdminLogin()">Скасувати</div>
+  </div>
+</div>
+</html>
