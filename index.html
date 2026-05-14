@@ -142,6 +142,7 @@ tbody tr:last-child td{border-bottom:none}
 
 /* ── REPORT ── */
 .report-block{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:14px}
+.chart-wrap{padding:16px;position:relative;height:280px}
 .rb-title{padding:11px 15px;font-size:12px;font-weight:700;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;color:var(--text)}
 .rb-note{margin-left:auto;font-size:10px;color:var(--text3);font-weight:400}
 
@@ -166,6 +167,10 @@ tbody tr:last-child td{border-bottom:none}
 .int-badge{display:inline-flex;align-items:center;padding:1px 7px;border-radius:100px;font-size:10px;font-weight:700;background:rgba(245,166,35,.12);color:var(--amber);border:1px solid rgba(245,166,35,.2);white-space:nowrap}
 .deduct-row{background:rgba(224,85,85,.06)}
 .pb{height:3px;background:var(--bg4);border-radius:2px;margin:0 15px 10px}
+.eff-bar-wrap{margin:8px 15px 4px;display:flex;align-items:center;gap:10px}
+.eff-bar-bg{flex:1;height:10px;background:var(--bg3);border-radius:6px;overflow:hidden}
+.eff-bar-fill{height:100%;border-radius:6px;transition:width .5s}
+.eff-label{font-size:11px;color:var(--text3);white-space:nowrap;min-width:60px;text-align:right}
 .pb-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s}
 
 /* report grand totals */
@@ -196,6 +201,14 @@ tbody tr:last-child td{border-bottom:none}
 
 /* ── MODAL ── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:999;align-items:center;justify-content:center}
+.wmod-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);width:min(700px,96vw);max-height:90vh;overflow-y:auto;padding:0}
+.wmod-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--bg3)}
+.wmod-name{font-size:16px;font-weight:700;flex:1}
+.wmod-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.wmod-stat{background:var(--bg2);padding:14px 16px;text-align:center}
+.wmod-stat-l{font-size:11px;color:var(--text3);margin-bottom:4px}
+.wmod-stat-v{font-size:22px;font-weight:700;color:var(--text)}
+.wmod-body{padding:16px 20px}
 .modal-overlay.open{display:flex}
 .modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;width:580px;max-width:96vw;max-height:93vh;overflow-y:auto}
 .modal-title{font-size:15px;font-weight:700;margin-bottom:14px}
@@ -247,6 +260,7 @@ select.fi option{background:#1e2536;color:#e8ecf4}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
 </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
 <div class="layout">
@@ -324,7 +338,6 @@ select.fi option{background:#1e2536;color:#e8ecf4}
     <div class="stats-row" id="ordStats"></div>
     <div class="toolbar">
       <select id="fWorker" onchange="renderOrders()"><option value="">Всі працівники</option></select>
-      <select id="fSvc" onchange="renderOrders()"><option value="">Всі послуги</option></select>
       <select id="fStatus" onchange="renderOrders()">
         <option value="">Всі статуси</option>
         <option value="new">Нове</option>
@@ -347,7 +360,7 @@ select.fi option{background:#1e2536;color:#e8ecf4}
           <th style="width:28px"></th>
           <th>Замовлення</th>
           <th>Послуги</th>
-          <th>ОП</th><th>Обробка</th><th>Видача</th>
+          <th>ОП</th><th>Обробка</th><th>Виконав</th>
           <th>Статус</th>
           <th>Оплата</th>
           <th style="text-align:right">Сума</th>
@@ -365,11 +378,14 @@ select.fi option{background:#1e2536;color:#e8ecf4}
         <div class="page-title">Звіт</div>
         <div class="page-sub" id="repSub"></div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <label style="font-size:12px;color:var(--text3)">День:</label>
-        <select class="fi" id="repDayFilter" onchange="renderReport()" style="width:130px;padding:6px 10px">
-          <option value="">Весь місяць</option>
-        </select>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:6px">
+          <label style="font-size:12px;color:var(--text3)">День:</label>
+          <input type="date" id="repDayFilter" class="fi" style="width:150px;padding:5px 8px"
+            oninput="renderReport()">
+          <button class="btn btn-outline" id="repDayClear" style="display:none;padding:4px 8px;font-size:11px"
+            onclick="document.getElementById('repDayFilter').value='';document.getElementById('repDayClear').style.display='none';renderReport()">✕</button>
+        </div>
         <button class="btn btn-outline" onclick="exportCSV()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Експорт CSV
         </button>
@@ -431,15 +447,12 @@ select.fi option{background:#1e2536;color:#e8ecf4}
         </select>
       </div>
       <div class="fg"><label class="fl">Оплата</label>
-        <select class="fi" id="mPaid" onchange="togglePaidDate()">
+        <select class="fi" id="mPaid">
           <option value="unpaid">Не оплачено</option>
           <option value="prepaid">Передплата</option>
           <option value="paid">Оплачено</option>
         </select>
       </div>
-    </div>
-    <div class="fg-row c2" id="paidDateRow" style="display:none">
-      <div class="fg" style="grid-column:1/-1"><label class="fl">Дата оплати</label><input class="fi" type="date" id="mPaidDate"></div>
     </div>
     <div class="fg-row c2" style="margin-bottom:10px">
       <div class="fg" style="grid-column:1/-1"><label class="fl">Примітка</label><input class="fi" type="text" id="mNote" placeholder="необов'язково"></div>
@@ -539,6 +552,8 @@ let services = JSON.parse(localStorage.getItem('svc4')||'null') || [
   {name:'виготовлення холста',price:700},
   {name:'оцифровка',price:240},
   {name:'скан',price:10},
+  {name:'фото 10х15 глянець',price:17},
+  {name:'фото 10х15 глянець терміново',price:34},
   {name:'акція вихідного дня 10х15',price:10}
 ];
 let workers = JSON.parse(localStorage.getItem('wkrs4')||'null') || ['Карплюк','Харченко','Бортник'];
@@ -778,7 +793,7 @@ function renderDayBar(){
   if(!filterDay){bar.classList.remove('visible');return;}
   bar.classList.add('visible');
   document.getElementById('dayBarDate').textContent=fmt(filterDay);
-  const dayO=monthOrders().filter(o=>o.date===filterDay);
+  const dayO=monthOrders().filter(o=>getDisplayDate(o)===filterDay);
   const tot=dayO.reduce((s,o)=>s+oTotal(o),0);
   const paid=dayO.filter(o=>o.paid==='paid').reduce((s,o)=>s+oTotal(o),0);
   const prepaid=dayO.filter(o=>o.paid==='prepaid').reduce((s,o)=>s+oTotal(o),0);
@@ -825,18 +840,17 @@ function filtered(){
   const w=document.getElementById('fWorker').value;
   const st=document.getElementById('fStatus').value;
   const pa=document.getElementById('fPaid').value;
-  const svc=document.getElementById('fSvc').value;
   const q=(document.getElementById('fNum').value||'').toLowerCase();
+  // якщо пошук >= 2 символи — шукаємо по ВСІХ замовленнях місяця (фільтр дня знятий)
   const base = q.length>=2 ? orders.filter(o=>o.date.slice(0,7)===ds(selYear,selMonth,1).slice(0,7)) : monthOrders();
   return base.filter(o=>{
-    if(q.length<2 && filterDay&&o.date!==filterDay)return false;
+    if(q.length<2 && filterDay&&getDisplayDate(o)!==filterDay)return false;
     if(w&&o.op!==w)return false;
     if(st&&o.status!==st)return false;
     if(pa==='unpaid'&&(o.paid==='paid'||o.paid==='prepaid'))return false;
     if(pa==='paid'&&o.paid!=='paid')return false;
     if(pa==='prepaid'&&o.paid!=='prepaid')return false;
     if(q&&!(o.num||'').toLowerCase().includes(q))return false;
-    if(svc&&!(o.items||[]).some(it=>it.service===svc))return false;
     return true;
   });
 }
@@ -854,43 +868,41 @@ function showPage(id,el){
 }
 
 /* ─── RENDER ORDERS ─── */
+function getDisplayDate(o){return(o.paid==='paid'&&o.paidDate)?o.paidDate:o.date;}
+
 function renderOrders(){
   /* update worker filter */
   const wf=document.getElementById('fWorker');const cw=wf.value;
   wf.innerHTML='<option value="">Всі працівники</option>';
   workers.forEach(w=>{const o=document.createElement('option');o.value=w;o.textContent=w;if(w===cw)o.selected=true;wf.appendChild(o);});
 
-  /* update service filter */
-  const sf=document.getElementById('fSvc');const cs=sf.value;
-  const moSvcs=[...new Set(monthOrders().flatMap(o=>(o.items||[]).map(it=>it.service)))].sort();
-  sf.innerHTML='<option value="">Всі послуги</option>'+moSvcs.map(s=>`<option value="${s}" ${s===cs?'selected':''}>${s}</option>`).join('');
-
-  const list=filtered().sort((a,b)=>a.date.localeCompare(b.date));
+  const list=filtered().sort((a,b)=>getDisplayDate(a).localeCompare(getDisplayDate(b)));
   const mo=monthOrders();
 
   const totMonth=mo.reduce((s,o)=>s+oTotal(o),0);
   const inWork=mo.filter(o=>o.status==='process'||o.status==='ready').length;
 
-  /* коли день вибраний — показуємо статистику за день, інакше — за місяць */
-  const statsBase = filterDay ? mo.filter(o=>o.date===filterDay) : mo;
+  /* якщо день вибраний — статистика за день, інакше — за місяць */
+  const statsBase = filterDay ? mo.filter(o=>getDisplayDate(o)===filterDay) : mo;
   const statLabel = filterDay ? 'за день' : 'за місяць';
   const totStat      = statsBase.reduce((s,o)=>s+oTotal(o),0);
   const totPaidStat  = statsBase.filter(o=>o.paid==='paid').reduce((s,o)=>s+oTotal(o),0);
   const totPrepaidStat= statsBase.filter(o=>o.paid==='prepaid').reduce((s,o)=>s+oTotal(o),0);
   const totUnpaidStat= statsBase.filter(o=>o.paid==='unpaid'||!o.paid).reduce((s,o)=>s+oTotal(o),0);
 
-  document.getElementById('ordSub').textContent=mLabel()+(filterDay?' · '+fmt(filterDay)+' (сума за день)':' (загальна за місяць)');
+  document.getElementById('ordSub').textContent=mLabel()+(filterDay?' · '+fmt(filterDay)+' (сума за день)':isAdmin?' (загальна за місяць)':'');
   document.getElementById('ordStats').innerHTML=`
     <div class="stat-card">
       <div class="stat-label">Замовлень ${statLabel}</div>
       <div class="stat-val">${statsBase.length}</div>
       ${filterDay?`<div class="stat-hint">за місяць: ${mo.length}</div>`:''}
     </div>
+    ${filterDay||isAdmin?`
     <div class="stat-card">
       <div class="stat-label">Сума ${statLabel}</div>
       <div class="stat-val green">${totStat.toLocaleString()} грн</div>
-      ${filterDay?`<div class="stat-hint">за місяць: ${totMonth.toLocaleString()} грн</div>`:''}
-    </div>
+      ${filterDay&&isAdmin?`<div class="stat-hint">за місяць: ${totMonth.toLocaleString()} грн</div>`:''}
+    </div>`:''}
     <div class="stat-card">
       <div class="stat-label">Оплачено</div>
       <div class="stat-val green">${totPaidStat.toLocaleString()} грн</div>
@@ -915,11 +927,12 @@ function renderOrders(){
   let html='', curDate='', dayBuf=[];
   const flush=()=>{
     if(!curDate)return;
-    const dtot=dayBuf.reduce((s,o)=>s+oTotal(o),0);
-    const dunpaid=dayBuf.filter(o=>o.paid!=='paid').reduce((s,o)=>s+oTotal(o),0);
+    const dtot=dayBuf.filter(o=>o.paid==='paid').reduce((s,o)=>s+oTotal(o),0);
+    const dunpaid=dayBuf.filter(o=>o.paid==='unpaid').reduce((s,o)=>s+oTotal(o),0);
+    const dprepaid=dayBuf.filter(o=>o.paid==='prepaid').reduce((s,o)=>s+oTotal(o),0);
     html+=`<tr class="dg-row">
       <td colspan="8"><b>${fmt(curDate)}</b></td>
-      <td class="dg-sum" style="text-align:right">${dtot.toLocaleString()} грн${dunpaid>0?`<span class="dg-unpaid">не оплач: ${dunpaid.toLocaleString()} грн</span>`:''}</td>
+      <td class="dg-sum" style="text-align:right">${dtot?dtot.toLocaleString()+' грн':''}${dprepaid>0?` <span class="prepaid-badge">передплата: ${dprepaid.toLocaleString()} грн</span>`:''}${dunpaid>0?`<span class="dg-unpaid">не оплач: ${dunpaid.toLocaleString()} грн</span>`:''}</td>
       <td></td>
     </tr>`;
     dayBuf.forEach(o=>{
@@ -944,11 +957,12 @@ function renderOrders(){
         </td>
         <td class="ord-sum" style="text-align:right">${tot.toLocaleString()} грн</td>
         <td><div class="actions">
-          ${isAdmin
-            ? `<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();editOrder(${ri})">✎</button>
-               <button class="btn btn-danger btn-xs" onclick="event.stopPropagation();delOrder(${ri})">✕</button>`
-            : `<button class="btn btn-outline btn-xs" title="Позначити оплату" onclick="event.stopPropagation();editOrder(${ri})">₴</button>`
-          }
+          ${isAdmin?`
+            <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();editOrder(${ri})">✎</button>
+            <button class="btn btn-danger btn-xs" onclick="event.stopPropagation();delOrder(${ri})">✕</button>
+          `:`
+            ${o.paid==='unpaid'?`<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();markPaid(${ri})">✓ оплачено</button>`:o.paid==='prepaid'?`<button class="btn btn-outline btn-xs" style="color:var(--purple);border-color:var(--purple)" onclick="event.stopPropagation();markPrepaid(${ri})">передплата→оплачено</button>`:''}
+          `}
         </div></td>
       </tr>`;
       if(isExp){
@@ -967,7 +981,7 @@ function renderOrders(){
     });
     dayBuf=[];
   };
-  list.forEach(o=>{if(o.date!==curDate){flush();curDate=o.date;}dayBuf.push(o);});
+  list.forEach(o=>{const dd=getDisplayDate(o);if(dd!==curDate){flush();curDate=dd;}dayBuf.push(o);});
   flush();
   document.getElementById('ordBody').innerHTML=html;
 }
@@ -976,18 +990,9 @@ function toggleExp(ri){if(expanded.has(ri))expanded.delete(ri);else expanded.add
 
 /* ─── RENDER REPORT ─── */
 function renderReport(){
-  /* заповнити дропдаун днів */
-  const daySel=document.getElementById('repDayFilter');
-  const selDay=daySel?daySel.value:'';
-  const allMo=monthOrders();
-  const days=[...new Set(allMo.filter(o=>!o.internal).map(o=>o.date))].sort();
-  if(daySel){
-    const prev=daySel.value;
-    daySel.innerHTML='<option value="">Весь місяць</option>'+days.map(d=>`<option value="${d}" ${d===prev?'selected':''}>${fmt(d)}</option>`).join('');
-    daySel.value=prev;
-  }
-
-  const mo=selDay ? allMo.filter(o=>o.date===selDay) : allMo;
+  const repDay=document.getElementById('repDayFilter')?.value||'';
+  if(repDay){const clr=document.getElementById('repDayClear');if(clr)clr.style.display='block';}
+  const mo=repDay ? monthOrders().filter(o=>o.date===repDay) : monthOrders();
 
   // Оплати що прийшли цього місяця але замовлення з іншого місяця
   const curYM=ds(selYear,selMonth,1).slice(0,7);
@@ -1000,25 +1005,21 @@ function renderReport(){
 
   const totAll=mo.filter(o=>!o.internal).reduce((s,o)=>s+oTotal(o),0);
   const totPaid=[...mo,...extraPaid].filter(o=>o.paid==='paid'||o.paid==='prepaid').reduce((s,o)=>s+oTotal(o),0);
-  const totPrepaid=mo.filter(o=>o.paid==='prepaid'&&!o.internal).reduce((s,o)=>s+oTotal(o),0);
+  const moAll=monthOrders(); // весь місяць незалежно від фільтру дня
+  const totPrepaid=moAll.filter(o=>o.paid==='prepaid'&&!o.internal).reduce((s,o)=>s+oTotal(o),0);
   const totUnpaid=mo.filter(o=>o.paid!=='paid'&&o.paid!=='prepaid'&&!o.internal).reduce((s,o)=>s+oTotal(o),0);
   const cntDone=mo.filter(o=>o.status==='done').length;
 
-  document.getElementById('repSub').textContent=mLabel()+' · '+mo.filter(o=>!o.internal).length+' замовлень';
+  document.getElementById('repSub').textContent=mLabel()+(repDay?' · '+fmt(repDay):'')+' · '+mo.filter(o=>!o.internal).length+' замовлень';
 
   const allSvcs=[...new Set(mo.filter(o=>!o.internal).flatMap(o=>(o.items||[]).map(it=>it.service)))];
 
   const DOC_SVC_KEYS=['фото на doc','фото на doc з носія','фото на doc з носія цифровий варіант','фото на документи','фото на документи з носія / цифровий варіант'];
   function isDocSvc(s){if(!s)return false;const sl=s.toLowerCase();return sl.includes('фото на doc')||sl.includes('фото на документи');}
-  function isRetush(s){if(!s)return false;return s.toLowerCase().includes('ретуш');}
-  function isScan(s){if(!s)return false;return s.toLowerCase().includes('скан');}
-  function isMoneysSvc(s){return isRetush(s)||isScan(s);}
-
   const wd={};
-  workers.forEach((w,i)=>{wd[w]={name:w,c:AVC[i%AVC.length],acc:0,proc:0,iss:0,issSum:0,days:new Set(),
-    svcOp:{},svcOpSum:{},
-    svcProc:{},svcProcSum:{},
-    svcIss:{},svcIssSum:{},
+  workers.forEach((w,i)=>{wd[w]={name:w,c:AVC[i%AVC.length],acc:0,proc:0,iss:0,issSum:0,days:new Set(),svcUnpaid:{},svcUnpaidSum:{},svcPrepaid:{},svcPrepaidSum:{},
+    svcOp:{},svcProc:{},svcIss:{},
+    svcOpSum:{},svcProcSum:{},svcIssSum:{},
     earnOp:0,earnProc:0,earnIss:0,
     internalSum:0,internalSvcs:{}};});
 
@@ -1038,61 +1039,82 @@ function renderReport(){
       wd[o.op].acc++;wd[o.op].days.add(o.date);
       items.forEach(it=>{
         wd[o.op].svcOp[it.service]=(wd[o.op].svcOp[it.service]||0)+it.qty;
-        if(isMoneysSvc(it.service)) wd[o.op].svcOpSum[it.service]=(wd[o.op].svcOpSum[it.service]||0)+(it.total||it.qty*(it.price||0));
+        if(!isDocSvc(it.service)) wd[o.op].svcOpSum[it.service]=(wd[o.op].svcOpSum[it.service]||0)+(it.total||it.qty*(it.price||0));
       });
+      // earnOp не рахується — тільки Видав
     }
     if(o.obrobka&&wd[o.obrobka]){
       wd[o.obrobka].proc++;wd[o.obrobka].days.add(o.date);
       items.forEach(it=>{
         wd[o.obrobka].svcProc[it.service]=(wd[o.obrobka].svcProc[it.service]||0)+it.qty;
-        if(isMoneysSvc(it.service)) wd[o.obrobka].svcProcSum[it.service]=(wd[o.obrobka].svcProcSum[it.service]||0)+(it.total||it.qty*(it.price||0));
+        if(!isDocSvc(it.service)) wd[o.obrobka].svcProcSum[it.service]=(wd[o.obrobka].svcProcSum[it.service]||0)+(it.total||it.qty*(it.price||0));
       });
+      // earnProc не рахується — тільки Видав
     }
     if(o.vydacha&&wd[o.vydacha]){
-      wd[o.vydacha].iss++;wd[o.vydacha].days.add(o.date);
-      if(done){
-        const nonDocSum=items.filter(it=>!isDocSvc(it.service)).reduce((s,it)=>s+(it.total||it.qty*(it.price||0)),0);
-        wd[o.vydacha].issSum+=nonDocSum;
-        wd[o.vydacha].earnIss+=nonDocSum;
+      const isPaid=o.paid==='paid';
+      const isUnpaid=o.paid==='unpaid';
+      const isPrepaid=o.paid==='prepaid';
+      if(isPaid){
+        wd[o.vydacha].iss++;wd[o.vydacha].days.add(o.date);
         items.forEach(it=>{
           wd[o.vydacha].svcIss[it.service]=(wd[o.vydacha].svcIss[it.service]||0)+it.qty;
-          if(isMoneysSvc(it.service)) wd[o.vydacha].svcIssSum[it.service]=(wd[o.vydacha].svcIssSum[it.service]||0)+(it.total||it.qty*(it.price||0));
+          wd[o.vydacha].svcIssSum[it.service]=(wd[o.vydacha].svcIssSum[it.service]||0)+(it.total||it.qty*(it.price||0));
+        });
+      }
+      if(isUnpaid){
+        items.forEach(it=>{
+          wd[o.vydacha].svcUnpaid[it.service]=(wd[o.vydacha].svcUnpaid[it.service]||0)+it.qty;
+          wd[o.vydacha].svcUnpaidSum[it.service]=(wd[o.vydacha].svcUnpaidSum[it.service]||0)+(it.total||it.qty*(it.price||0));
+        });
+      }
+      if(isPrepaid){
+        items.forEach(it=>{
+          wd[o.vydacha].svcPrepaid[it.service]=(wd[o.vydacha].svcPrepaid[it.service]||0)+it.qty;
+          wd[o.vydacha].svcPrepaidSum[it.service]=(wd[o.vydacha].svcPrepaidSum[it.service]||0)+(it.total||it.qty*(it.price||0));
         });
       }
     }
   });
 
-  /* ефективність = видані замовлення / робочі дні */
-  const maxEff=Math.max(...Object.values(wd).map(w=>w.days.size>0?w.iss/w.days.size:0),1);
-  const maxDays=Math.max(...Object.values(wd).map(w=>w.days.size),1);
+  const maxSum=Math.max(...Object.values(wd).map(w=>w.issSum),1);
 
-  const wHtml=Object.values(wd).map(w=>{
+  const maxActions=Math.max(...Object.values(wd).map(w=>w.acc+w.proc+w.iss),1);
+  const wHtml=Object.values(wd).filter(w=>repDay||(w.acc+w.proc+w.iss>0)).map(w=>{
     let svcTable='';
     if(allSvcs.length){
-      function svcCell(s,qty,sum){
-        if(!qty)return`<td class="svc-td">—</td>`;
-        if(isMoneysSvc(s)) return`<td class="svc-td"><span style="font-weight:700;color:var(--green)">${sum.toLocaleString()} грн</span></td>`;
-        return`<td class="svc-td"><span style="font-weight:600">${qty} шт.</span></td>`;
-      }
-      const heads=allSvcs.map(s=>`<th class="svc-th">${s}</th>`).join('');
       const roles=[
-        {label:'Прийняв', qty:w.svcOp,   sum:{}, money:false},
-        {label:'Обробив', qty:w.svcProc, sum:{}, money:false},
-        {label:'Видав',   qty:w.svcIss,  sum:w.svcIssSum, money:true},
+        {label:'ОП',        qty:w.svcOp,       sum:{},             showSum:false},
+        {label:'Обробка',   qty:w.svcProc,     sum:{},             showSum:false},
+        {label:'Виконав',   qty:w.svcIss,      sum:w.svcIssSum,    showSum:true},
+        {label:'Неоплачено',qty:w.svcUnpaid,   sum:w.svcUnpaidSum, showSum:true, color:'var(--red)'},
+        {label:'Передплата',qty:w.svcPrepaid,  sum:w.svcPrepaidSum,showSum:true, color:'var(--purple)'},
       ];
+      const heads=allSvcs.map(s=>`<th class="svc-th">${s}</th>`).join('');
       const rows=roles.map(r=>{
-        if(!allSvcs.some(s=>r.qty[s]))return'';
+        if(!repDay && !allSvcs.some(s=>r.qty[s]))return '';
         const cells=allSvcs.map(s=>{
-          const qty=r.qty[s]||0;
-          if(!qty)return`<td class="svc-td">—</td>`;
-          if(r.money&&isMoneysSvc(s)){
-            const sm=r.sum[s]||0;
-            return`<td class="svc-td"><span style="font-weight:700;color:var(--green)">${sm.toLocaleString()} грн</span></td>`;
+          if(!r.qty[s])return`<td class="svc-td">—</td>`;
+          const q=r.qty[s];
+          const isRetouch=s.toLowerCase().includes('ретуш');
+          const rowColor=r.color||'';
+          const sm=r.sum[s]||0;
+          if(r.showSum && sm){
+            const clr=rowColor||(isRetouch?'var(--green)':'var(--text2)');
+            return`<td class="svc-td"><span style="font-weight:600;${rowColor?'color:'+rowColor:''}">${q} шт.</span><br><span style="color:${clr};font-size:10px;font-weight:600">${sm.toLocaleString()} грн</span></td>`;
           }
-          return`<td class="svc-td"><span style="font-weight:600">${qty} шт.</span></td>`;
+          return`<td class="svc-td"><span style="font-weight:600;${rowColor?'color:'+rowColor:''}">${q} шт.</span></td>`;
         }).join('');
-        return`<tr><td class="svc-role">${r.label}</td>${cells}</tr>`;
+        return `<tr><td class="svc-role" style="${r.color?'color:'+r.color:''}">${r.label}</td>${cells}</tr>`;
       }).filter(Boolean).join('');
+      /* підсумковий рядок — всього грн по кожній послузі */
+      const totCells=allSvcs.map(s=>{
+        const qAll=(w.svcOp[s]||0)+(w.svcProc[s]||0)+(w.svcIss[s]||0);
+        const sAll=w.svcIssSum[s]||0; // сума тільки з видачі
+        if(!qAll)return`<td class="svc-td" style="background:var(--bg3)">—</td>`;
+        return`<td class="svc-td" style="background:var(--bg3)"><span style="font-weight:700">${qAll} шт.</span></td>`;
+      }).join('');
+      const totRow=`<tr style="border-top:2px solid var(--border)"><td class="svc-role" style="color:var(--text1);font-weight:700">Всього</td>${totCells}</tr>`;
       if(rows) svcTable=`<div style="overflow-x:auto;padding:0 15px 12px"><table class="svc-breakdown"><thead><tr><th class="svc-th" style="text-align:left;color:var(--text3)">Роль</th>${heads}</tr></thead><tbody>${rows}</tbody></table></div>`;
     }
     let intBlock='';
@@ -1104,37 +1126,23 @@ function renderReport(){
         <span style="margin-left:auto;color:var(--red);font-weight:700">−${w.internalSum.toLocaleString()} грн з зарплати</span>
       </div>`;
     }
-    const totalEarned=w.earnIss;
-    const eff=w.days.size>0?(w.iss/w.days.size).toFixed(1):0;
-    const effPct=Math.round((w.days.size>0?w.iss/w.days.size:0)/maxEff*100);
-    const daysPct=Math.round(w.days.size/maxDays*100);
-    return `<div class="wb">
+    const totalActions=w.acc+w.proc+w.iss;
+    const effPct=maxActions>0?Math.round(totalActions/maxActions*100):0;
+    const effColor=effPct>=80?'var(--green)':effPct>=50?'var(--amber)':'var(--red)';
+    return `<div class="wb" style="cursor:pointer" onclick="openWorkerReport('${w.name}','${repDay}')">
       <div class="wb-head">
         <div class="ava ${w.c}">${w.name[0]}</div>
-        <div class="wb-name">${w.name}<span class="wb-days">${w.days.size} дн.</span></div>
-        <span style="font-size:11px;color:var(--text3);margin-right:10px">${w.acc+w.proc+w.iss} дій</span>
-        <span class="wb-total">${totalEarned?totalEarned.toLocaleString()+' грн':'—'}</span>
+        <div class="wb-name">${w.name}</div>
+        <span style="margin-left:auto;font-size:12px;font-weight:700;color:${effColor}">${effPct}%</span>
       </div>
-      <div style="padding:6px 15px 4px;display:flex;flex-direction:column;gap:5px">
-        <div style="display:flex;align-items:center;gap:8px;font-size:11px">
-          <span style="color:var(--text3);width:90px">Робочих днів</span>
-          <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
-            <div style="height:100%;width:${daysPct}%;background:var(--blue);border-radius:3px;transition:width .4s"></div>
-          </div>
-          <span style="color:var(--text2);width:30px;text-align:right">${w.days.size}</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;font-size:11px">
-          <span style="color:var(--text3);width:90px">Ефективність</span>
-          <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
-            <div style="height:100%;width:${effPct}%;background:var(--green);border-radius:3px;transition:width .4s"></div>
-          </div>
-          <span style="color:var(--green);width:30px;text-align:right;font-weight:700">${eff}</span>
-        </div>
+      <div class="eff-bar-wrap">
+        <div class="eff-bar-bg"><div class="eff-bar-fill" style="width:${effPct}%;background:${effColor}"></div></div>
+        <span class="eff-label">${totalActions} дій</span>
       </div>
       <div class="wb-stats">
-        <div class="wb-stat"><div class="wb-stat-label">Прийняв</div><div class="wb-stat-val">${w.acc}</div></div>
-        <div class="wb-stat"><div class="wb-stat-label">Обробив</div><div class="wb-stat-val">${w.proc}</div></div>
-        <div class="wb-stat"><div class="wb-stat-label">Видав</div><div class="wb-stat-val">${w.iss}</div><div class="wb-stat-sum">${w.issSum?w.issSum.toLocaleString()+' грн':'—'}</div></div>
+        <div class="wb-stat"><div class="wb-stat-label">ОП</div><div class="wb-stat-val">${w.acc}</div></div>
+        <div class="wb-stat"><div class="wb-stat-label">Обробка</div><div class="wb-stat-val">${w.proc}</div></div>
+        <div class="wb-stat"><div class="wb-stat-label">Виконав</div><div class="wb-stat-val">${w.iss}</div></div>
       </div>
       ${svcTable}${intBlock}
     </div>`;
@@ -1148,7 +1156,27 @@ function renderReport(){
     return `<tr><td class="ms-label">${o.date}</td><td class="ms-label">${iw}</td><td class="ms-label">${svcs}</td><td class="ms-val red">−${oTotal(o).toLocaleString()} грн</td></tr>`;
   }).join(''):'<tr><td colspan="4" class="ms-label" style="text-align:center;padding:12px;color:var(--text3)">Немає внутрішніх замовлень за цей місяць</td></tr>';
 
+  // Дані для діаграми
+  const chartDays=repDay?[repDay]:[...new Set(mo.filter(o=>!o.internal).map(o=>getDisplayDate(o)))].sort();
+  const chartColors=['#6366f1','#22d3a0','#f59e0b','#e05555','#a78bf6','#38bdf8'];
+  const chartDatasets=workers.map((w,i)=>({
+    label:w,
+    data:chartDays.map(d=>mo.filter(o=>!o.internal&&o.vydacha===w&&o.paid==='paid'&&getDisplayDate(o)===d).length),
+    backgroundColor:chartColors[i%chartColors.length]+'bb',
+    borderColor:chartColors[i%chartColors.length],
+    borderWidth:1,borderRadius:4,
+  }));
+
   document.getElementById('repContent').innerHTML=`
+    <div class="report-block">
+      <div class="rb-title">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Виконані замовлення — ${repDay?fmt(repDay):mLabel()}
+        <span class="rb-note">тільки оплачені · Виконав</span>
+      </div>
+      <div class="chart-wrap"><canvas id="repChart"></canvas></div>
+    </div>
+
     <div class="report-block">
       <div class="rb-title">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -1191,49 +1219,28 @@ function renderReport(){
         <tr><td class="ms-label">Неоплачено</td><td class="ms-val red">${totUnpaid.toLocaleString()} грн (${mo.filter(o=>o.paid!=='paid'&&o.paid!=='prepaid'&&!o.internal).length} замовл.)</td></tr>
         ${intTotal?`<tr class="deduct-row"><td class="ms-label">Списати з зарплат (внутрішні)</td><td class="ms-val red">−${intTotal.toLocaleString()} грн</td></tr>`:''}
       </table>
-    </div>
-
-    <div class="report-block">
-      <div class="rb-title">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        Ефективність працівників — ${mLabel()}
-        <span class="rb-note">видано замовлень ÷ робочих днів</span>
-      </div>
-      <div style="padding:14px 16px;display:flex;flex-direction:column;gap:14px">
-        ${Object.values(wd).sort((a,b)=>{
-          const ea=a.days.size>0?a.iss/a.days.size:0;
-          const eb=b.days.size>0?b.iss/b.days.size:0;
-          return eb-ea;
-        }).map((w,rank)=>{
-          const eff=w.days.size>0?(w.iss/w.days.size):0;
-          const effPct=Math.round(eff/maxEff*100);
-          const daysPct=Math.round(w.days.size/maxDays*100);
-          const medal=rank===0?'🥇':rank===1?'🥈':rank===2?'🥉':'';
-          return`<div>
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-              <div class="ava ${w.c}" style="width:26px;height:26px;font-size:11px;flex-shrink:0">${w.name[0]}</div>
-              <span style="font-size:13px;font-weight:600">${medal} ${w.name}</span>
-              <span style="margin-left:auto;font-size:12px;color:var(--text3)">${w.days.size} дн. · ${w.iss} видано</span>
-              <span style="font-size:15px;font-weight:700;color:var(--green);min-width:36px;text-align:right">${eff.toFixed(1)}</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text3);margin-bottom:3px">
-              <span style="width:70px">Дні роботи</span>
-              <div style="flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden">
-                <div style="height:100%;width:${daysPct}%;background:var(--blue);border-radius:3px"></div>
-              </div>
-              <span style="width:20px;text-align:right">${w.days.size}</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text3)">
-              <span style="width:70px">Ефективність</span>
-              <div style="flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden">
-                <div style="height:100%;width:${effPct}%;background:${rank===0?'var(--green)':'var(--blue)'};border-radius:3px"></div>
-              </div>
-              <span style="width:20px;text-align:right;color:${rank===0?'var(--green)':'var(--text2)'};font-weight:700">${eff.toFixed(1)}</span>
-            </div>
-          </div>`;
-        }).join('<div style="height:1px;background:var(--border)"></div>')}
-      </div>
     </div>`;
+  // ── Ініціалізація діаграми ──
+  requestAnimationFrame(()=>{
+    const canvas=document.getElementById('repChart');
+    if(!canvas)return;
+    if(window._repChart)window._repChart.destroy();
+    window._repChart=new Chart(canvas,{
+      type:'bar',
+      data:{labels:chartDays.map(d=>fmt(d)),datasets:chartDatasets},
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{labels:{color:'#b8c2d4',font:{family:'Manrope',size:11}}},
+          tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y} замовл.`}}
+        },
+        scales:{
+          x:{ticks:{color:'#7a8aa0',font:{size:10},maxRotation:45},grid:{color:'#2a3347'}},
+          y:{ticks:{color:'#7a8aa0',stepSize:1},grid:{color:'#2a3347'},beginAtZero:true}
+        }
+      }
+    });
+  });
 }
 
 
@@ -1268,6 +1275,99 @@ function editSvcPrice(i){
   services[i].price=p;
   persist();renderServices();
 }
+function openWorkerReport(name,day){
+  const AVC=['av-blue','av-green','av-amber','av-red','av-purple'];
+  const wi=workers.indexOf(name);
+  const moAll=monthOrders();
+  const mo=day?moAll.filter(o=>o.date===day):moAll;
+  const acc=mo.filter(o=>o.op===name&&!o.internal);
+  const proc=mo.filter(o=>o.obrobka===name&&!o.internal);
+  const done=mo.filter(o=>o.vydacha===name&&o.paid==='paid'&&!o.internal);
+  const unpaid=mo.filter(o=>o.vydacha===name&&o.paid==='unpaid');
+  const prepaid=mo.filter(o=>o.vydacha===name&&o.paid==='prepaid');
+
+  // Послуги виконано — кількість і сума
+  const svcMap={}, svcSumMap={};
+  done.forEach(o=>(o.items||[]).forEach(it=>{
+    svcMap[it.service]=(svcMap[it.service]||0)+it.qty;
+    svcSumMap[it.service]=(svcSumMap[it.service]||0)+(it.total||it.qty*(it.price||0));
+  }));
+  const doneTotal=done.reduce((s,o)=>s+oTotal(o),0);
+  const unpaidTotal=unpaid.reduce((s,o)=>s+oTotal(o),0);
+  const prepaidTotal=prepaid.reduce((s,o)=>s+oTotal(o),0);
+
+  const svcRows=Object.entries(svcMap).map(([s,q])=>{
+    const sm=svcSumMap[s]||0;
+    return`<tr>
+      <td class="ms-label">${s}</td>
+      <td class="ms-val" style="text-align:center">${q} шт.</td>
+      <td class="ms-val green">${sm.toLocaleString()} грн</td>
+    </tr>`;
+  }).join('');
+
+  // Неоплачено
+  const unpaidRows=unpaid.map(o=>`<tr>
+    <td class="ms-label">${fmt(o.date)}${o.num?' #'+o.num:''}</td>
+    <td class="ms-label">${(o.items||[]).map(it=>it.service+(it.qty>1?' ×'+it.qty:'')).join(', ')}</td>
+    <td class="ms-val red">${oTotal(o).toLocaleString()} грн</td>
+  </tr>`).join('');
+
+  // Передплата
+  const prepaidRows=prepaid.map(o=>`<tr>
+    <td class="ms-label">${fmt(o.date)}${o.num?' #'+o.num:''}</td>
+    <td class="ms-label">${(o.items||[]).map(it=>it.service+(it.qty>1?' ×'+it.qty:'')).join(', ')}</td>
+    <td class="ms-val" style="color:var(--purple)">${oTotal(o).toLocaleString()} грн</td>
+  </tr>`).join('');
+
+  const el=document.getElementById('wkRepAva');
+  el.textContent=name[0];
+  el.className='ava '+(AVC[wi%AVC.length]);
+  document.getElementById('wkRepName').textContent=name+' — '+(day?fmt(day):mLabel());
+  document.getElementById('wkRepStats').innerHTML=`
+    <div class="wmod-stat"><div class="wmod-stat-l">Прийняв (ОП)</div><div class="wmod-stat-v">${acc.length}</div></div>
+    <div class="wmod-stat"><div class="wmod-stat-l">Обробив</div><div class="wmod-stat-v">${proc.length}</div></div>
+    <div class="wmod-stat"><div class="wmod-stat-l">Виконав</div><div class="wmod-stat-v">${done.length}<br><span style="font-size:13px;color:var(--green);font-weight:600">${doneTotal.toLocaleString()} грн</span></div></div>`;
+  document.getElementById('wkRepBody').innerHTML=`
+    ${svcRows?`<div style="margin-bottom:16px">
+      <div class="rb-title" style="margin:0 -20px 10px;padding:8px 20px">
+        Виконані послуги
+        <span class="rb-note" style="margin-left:auto;color:var(--green);font-weight:700">${doneTotal.toLocaleString()} грн</span>
+      </div>
+      <table class="ms-table" style="width:100%">
+        <tr style="background:var(--bg3)">
+          <td class="ms-label" style="font-weight:700">Послуга</td>
+          <td class="ms-val" style="font-weight:700;text-align:center">К-сть</td>
+          <td class="ms-val" style="font-weight:700">Сума</td>
+        </tr>
+        ${svcRows}
+        <tr style="border-top:2px solid var(--border)">
+          <td class="ms-label" style="font-weight:700">Разом</td>
+          <td class="ms-val" style="text-align:center;font-weight:700">${Object.values(svcMap).reduce((a,b)=>a+b,0)} шт.</td>
+          <td class="ms-val green" style="font-size:15px;font-weight:700">${doneTotal.toLocaleString()} грн</td>
+        </tr>
+      </table></div>`:''}
+    ${unpaidRows?`<div style="margin-bottom:16px">
+      <div class="rb-title" style="margin:0 -20px 10px;padding:8px 20px;color:var(--red)">
+        Неоплачено (у видачі)
+        <span class="rb-note" style="margin-left:auto;color:var(--red);font-weight:700">${unpaidTotal.toLocaleString()} грн</span>
+      </div>
+      <table class="ms-table" style="width:100%">
+        <tr style="background:var(--bg3)"><td class="ms-label" style="font-weight:700">Дата / №</td><td class="ms-label" style="font-weight:700">Послуги</td><td class="ms-val" style="font-weight:700">Сума</td></tr>
+        ${unpaidRows}
+      </table></div>`:''}
+    ${prepaidRows?`<div style="margin-bottom:16px">
+      <div class="rb-title" style="margin:0 -20px 10px;padding:8px 20px;color:var(--purple)">
+        Передплата (у видачі)
+        <span class="rb-note" style="margin-left:auto;color:var(--purple);font-weight:700">${prepaidTotal.toLocaleString()} грн</span>
+      </div>
+      <table class="ms-table" style="width:100%">
+        <tr style="background:var(--bg3)"><td class="ms-label" style="font-weight:700">Дата / №</td><td class="ms-label" style="font-weight:700">Послуги</td><td class="ms-val" style="font-weight:700">Сума</td></tr>
+        ${prepaidRows}
+      </table></div>`:''}
+    ${!svcRows&&!unpaidRows&&!prepaidRows?'<div class="empty">Немає даних за цей місяць</div>':''}`;
+  document.getElementById('wkRepModal').classList.add('open');
+}
+
 function renderAll(){renderCal();renderDayBar();renderOrders();renderWorkers();renderServices();}
 
 /* ─── MODAL MULTI-SERVICE ─── */
@@ -1300,20 +1400,8 @@ function popWorkers(){
   document.getElementById('mObrob').innerHTML='<option value="">—</option>'+workers.map(w=>`<option value="${w}">${w}</option>`).join('');
 }
 
-function unlockModalFields(){
-  const lockIds=['mDate','mNum','mOP','mObrob','mVyd','mStatus','mNote','mCreatedAt','mDeliveredAt','mInternal','mInternalWorker'];
-  lockIds.forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=false;});
-  document.querySelector('.msvc-wrap').style.pointerEvents='';
-  document.querySelector('.msvc-wrap').style.opacity='1';
-  const addBtn=document.getElementById('ordModal').querySelector('[onclick="addSvcLine()"]');
-  if(addBtn)addBtn.style.display='';
-  const hint=document.getElementById('nonAdminHint');
-  if(hint)hint.style.display='none';
-}
-
 function openAddOrder(){
   editIdx=null;
-  unlockModalFields();
   document.getElementById('ordModalTitle').textContent='Нове замовлення';
   popWorkers();
   document.getElementById('mDate').value=filterDay||new Date().toISOString().slice(0,10);
@@ -1331,7 +1419,7 @@ function openAddOrder(){
 }
 function editOrder(idx){
   editIdx=idx;const o=orders[idx];
-  document.getElementById('ordModalTitle').textContent= isAdmin ? 'Редагувати замовлення' : 'Замовлення';
+  document.getElementById('ordModalTitle').textContent='Редагувати замовлення';
   popWorkers();
   document.getElementById('mDate').value=o.date;
   document.getElementById('mNum').value=o.num||'';
@@ -1340,8 +1428,6 @@ function editOrder(idx){
   document.getElementById('mVyd').value=o.vydacha||workers[0]||'';
   document.getElementById('mStatus').value=o.status||'new';
   document.getElementById('mPaid').value=o.paid||'unpaid';
-  document.getElementById('mPaidDate').value=o.paidDate||'';
-  togglePaidDate();
   document.getElementById('mNote').value=o.note||'';
   document.getElementById('mCreatedAt').value=o.createdAt||'';
   document.getElementById('mDeliveredAt').value=o.deliveredAt||'';
@@ -1351,42 +1437,7 @@ function editOrder(idx){
   modalItems=(o.items||[]).map(it=>({...it}));
   if(!modalItems.length)addSvcLine();
   renderSvcLines();
-
-  /* блокуємо поля для не-адміна */
-  const lockIds=['mNum','mOP','mObrob','mVyd','mStatus','mNote','mCreatedAt','mDeliveredAt','mInternal','mInternalWorker'];
-  lockIds.forEach(id=>{
-    const el=document.getElementById(id);
-    if(el){el.disabled=!isAdmin;}
-  });
-  /* дата замовлення і дата оплати — доступні всім */
-  document.getElementById('mDate').disabled=false;
-  document.getElementById('mPaidDate').disabled=false;
-  /* блокуємо кнопки послуг */
-  document.querySelector('.msvc-wrap').style.pointerEvents=isAdmin?'':'none';
-  document.querySelector('.msvc-wrap').style.opacity=isAdmin?'1':'0.5';
-  document.getElementById('ordModal').querySelector('[onclick="addSvcLine()"]').style.display=isAdmin?'':'none';
-
-  /* підказка для не-адміна */
-  let hint=document.getElementById('nonAdminHint');
-  if(!hint){
-    hint=document.createElement('div');
-    hint.id='nonAdminHint';
-    hint.style.cssText='font-size:12px;color:var(--amber);background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:8px;padding:8px 12px;margin-bottom:10px';
-    document.getElementById('mPaid').closest('.fg').parentElement.before(hint);
-  }
-  hint.style.display=isAdmin?'none':'block';
-  hint.textContent='⚠ Ви можете змінити дату замовлення та статус оплати';
-
   document.getElementById('ordModal').classList.add('open');
-}
-function togglePaidDate(){
-  const paid=document.getElementById('mPaid').value;
-  const row=document.getElementById('paidDateRow');
-  row.style.display=(paid==='paid'||paid==='prepaid')?'':'none';
-  if(paid==='paid'||paid==='prepaid'){
-    if(!document.getElementById('mPaidDate').value)
-      document.getElementById('mPaidDate').value=new Date().toISOString().slice(0,10);
-  }
 }
 function toggleInternal(){
   const on=document.getElementById('mInternal').checked;
@@ -1399,16 +1450,6 @@ function toggleInternal(){
 }
 
 function saveOrder(){
-  if(!isAdmin && editIdx!==null){
-    const paid=document.getElementById('mPaid').value;
-    const newDate=document.getElementById('mDate').value;
-    const prev=orders[editIdx];
-    let paidDate=document.getElementById('mPaidDate').value||'';
-    if(paid==='unpaid') paidDate='';
-    orders[editIdx]={...prev, date:newDate, paid, paidDate};
-    persist();closeOrdModal();renderCal();renderDayBar();renderOrders();
-    return;
-  }
   if(!modalItems.length){alert('Додайте послугу');return;}
   const date=document.getElementById('mDate').value;
   if(!date){alert('Вкажіть дату');return;}
@@ -1443,34 +1484,22 @@ function saveOrder(){
   if(editIdx!==null)orders[editIdx]=o;else orders.push(o);
   persist();closeOrdModal();renderCal();renderDayBar();renderOrders();
 }
-function transferOrder(idx){
-  const o=orders[idx];
-  if(o.paid==='paid'){alert('Оплачене замовлення не можна переносити');return;}
-  // показати міні-модалку з вибором дати
-  const overlay=document.createElement('div');
-  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:flex;align-items:center;justify-content:center';
-  overlay.innerHTML=`
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px 20px;width:280px;text-align:center">
-      <div style="font-size:14px;font-weight:700;margin-bottom:6px">Перенести замовлення</div>
-      <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Поточна дата: <b>${fmt(o.date)}</b></div>
-      <input type="date" id="transferDatePick" value="${o.date}"
-        style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px;margin-bottom:14px">
-      <div style="display:flex;gap:8px">
-        <button class="btn" style="flex:1" onclick="
-          const d=document.getElementById('transferDatePick').value;
-          if(!d){alert('Оберіть дату');return;}
-          orders[${idx}]={...orders[${idx}],date:d};
-          persist();renderCal();renderDayBar();renderOrders();
-          document.body.removeChild(this.closest('[style*=fixed]'));
-        ">Перенести</button>
-        <button class="btn btn-outline" style="flex:1" onclick="document.body.removeChild(this.closest('[style*=fixed]'))">Скасувати</button>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
-  setTimeout(()=>document.getElementById('transferDatePick').focus(),50);
-}
 function delOrder(idx){if(!confirm('Видалити замовлення?'))return;orders.splice(idx,1);persist();renderCal();renderDayBar();renderOrders();}
-function closeOrdModal(){document.getElementById('ordModal').classList.remove('open');unlockModalFields();}
+function markPaid(idx){
+  const o=orders[idx];
+  if(!confirm('Позначити замовлення як оплачене?'))return;
+  o.paid='paid';
+  o.paidDate=new Date().toISOString().slice(0,10);
+  persist();renderCal();renderDayBar();renderOrders();
+}
+function markPrepaid(idx){
+  const o=orders[idx];
+  if(!confirm('Змінити передплату на оплачено?'))return;
+  o.paid='paid';
+  o.paidDate=new Date().toISOString().slice(0,10);
+  persist();renderCal();renderDayBar();renderOrders();
+}
+function closeOrdModal(){document.getElementById('ordModal').classList.remove('open');}
 
 function openAddService(){document.getElementById('sName').value='';document.getElementById('sPrice').value='';document.getElementById('svcModal').classList.add('open');}
 function closeSvcModal(){document.getElementById('svcModal').classList.remove('open');}
@@ -1501,7 +1530,11 @@ function resetServices(){
     {name:'виготовлення холста',price:700},
     {name:'оцифровка',price:240},
   {name:'скан',price:10},
-    {name:'акція вихідного дня 10х15',price:10}
+  {name:'фото 10х15 глянець',price:17},
+  {name:'фото 10х15 глянець терміново',price:34},
+    {name:'акція вихідного дня 10х15',price:10},
+    {name:'фото 10х15 глянець',price:17},
+    {name:'фото 10х15 глянець терміново',price:34}
   ];
   persist();renderServices();
 }
@@ -1513,7 +1546,7 @@ function delWorker(i){if(!confirm('Видалити?'))return;workers.splice(i,1
 
 function exportCSV(){
   const mo=monthOrders();if(!mo.length){alert('Немає даних');return;}
-  const rows=[['Дата','Номер','Послуга','К-сть','Ціна','Сума','ОП','Обробка','Видача','Статус','Оплата','Примітка']];
+  const rows=[['Дата','Номер','Послуга','К-сть','Ціна','Сума','ОП','Обробка','Виконав','Статус','Оплата','Примітка']];
   mo.forEach(o=>(o.items||[]).forEach(it=>rows.push([o.date,o.num,it.service,it.qty,it.price,it.total,o.op,o.obrobka,o.vydacha,SL[o.status]||'',o.paid==='paid'?'Оплачено':'Не оплачено',o.note||''])));
   const csv=rows.map(r=>r.map(c=>'"'+(c||'').toString().replace(/"/g,'""')+'"').join(',')).join('\n');
   const a=document.createElement('a');
@@ -1614,3 +1647,15 @@ init();
   </div>
 </div>
 </html>
+
+<div class="modal-overlay" id="wkRepModal">
+  <div class="wmod-box">
+    <div class="wmod-head">
+      <div class="ava" id="wkRepAva" style="width:36px;height:36px;font-size:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700"></div>
+      <div class="wmod-name" id="wkRepName"></div>
+      <button class="btn btn-outline" onclick="document.getElementById('wkRepModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="wmod-stats" id="wkRepStats"></div>
+    <div class="wmod-body" id="wkRepBody"></div>
+  </div>
+</div>
