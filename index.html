@@ -259,8 +259,230 @@ select.fi option{background:#1e2536;color:#e8ecf4}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+
+/* ───── GRAFIK ───── */
+#page-grafik{overflow:hidden!important;padding:0!important;display:flex;flex-direction:column}
+.grafik-page{padding:12px 16px 0;display:flex;flex-direction:column;overflow:hidden;flex:1;min-height:0}
+.grafik-print-wrap{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
+.g-top-workers{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;flex-shrink:0}
+.g-worker{padding:6px 14px;border-radius:10px;font-weight:700;font-size:12px;display:flex;align-items:center;gap:8px}
+.g-worker span{font-size:11px;opacity:.8}
+.g-blue{background:#1b2740;border:1.5px solid #2f6fff;color:#7db5ff}
+.g-green{background:#162b29;border:1.5px solid #16856a;color:#5ef0bf}
+.g-brown{background:#2b2119;border:1.5px solid #7c5435;color:#d8a67c}
+.g-purple{background:#221b40;border:1.5px solid #7c4fff;color:#c4a0ff}
+.grafik-controls{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-shrink:0;min-height:0}
+.grafik-controls select{background:#1a2540;color:#fff;border:1px solid #263554;padding:6px 10px;border-radius:8px;font-size:13px}
+.grafik-scroll{flex:1;overflow-y:auto;border-radius:10px;border:1px solid #263554;min-height:0}
+.grafik-table{width:100%;border-collapse:collapse}
+.grafik-table th{background:#1c2742;color:#8ea6df;padding:5px 8px;border:1px solid #263554;font-size:11px;position:sticky;top:0;z-index:2}
+.grafik-table td{background:#101827;border:1px solid #1e2d47;padding:2px 4px;font-size:12px}
+.grafik-table tr:nth-child(even) td{background:#111c2e}
+.grafik-table tr.today-row td{background:#1a2e1a!important;border-color:#16856a}
+.grafik-table tr.sat-row td{background:#211e08!important;border-color:#4a420a}
+.grafik-table tr.sat-row .day-name{color:#fbbf24!important;font-weight:700}
+.grafik-table tr.sat-row .day-num{color:#fbbf24!important}
+.grafik-table tr.sun-row td{background:#211e08!important;border-color:#4a420a}
+.grafik-table tr.sun-row .day-name{color:#fbbf24!important;font-weight:700}
+.grafik-table tr.sun-row .day-num{color:#fbbf24!important}
+.worker-cell select{width:100%;height:26px;border:none;border-radius:6px;background:#1a2540;color:white;padding:0 6px;font-weight:600;font-size:11px;cursor:pointer}
+.worker-cell.blue select{box-shadow:inset 0 0 0 1.5px #2f6fff;color:#7db5ff}
+.worker-cell.green select{box-shadow:inset 0 0 0 1.5px #16856a;color:#5ef0bf}
+.worker-cell.brown select{box-shadow:inset 0 0 0 1.5px #7c5435;color:#d8a67c}
+.worker-cell.purple select{box-shadow:inset 0 0 0 1.5px #7c4fff;color:#c4a0ff}
+.worker-cell.gray select{box-shadow:inset 0 0 0 1.5px #556;color:#aaa}
+.grafik-actions{display:flex;gap:8px;margin-top:8px;flex-shrink:0;padding-top:4px}
+.grafik-save{background:#2f6fff;color:white;border:none;padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600}
+.grafik-pdf{background:#16856a;color:white;border:none;padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600}
+.day-num{font-weight:700;color:#e8ecf4;min-width:20px;text-align:center}
+.day-name{color:#8ea6df;font-size:10px}
+
+@media print{
+  @page{size:A4 portrait;margin:10mm}
+  body *{visibility:hidden}
+  .grafik-print-wrap,
+  .grafik-print-wrap *{visibility:visible}
+  .grafik-print-wrap{
+    position:fixed;top:0;left:0;width:100%;
+    padding:0;margin:0;
+    background:white!important;color:#000!important;
+  }
+  .grafik-actions,.grafik-controls,.print-legend{display:none!important}
+  .print-month-title{
+    display:block!important;
+    font-size:14pt;font-weight:700;text-align:center;
+    margin-bottom:4mm;color:#000;font-family:Arial,sans-serif;
+  }
+  .g-top-workers{
+    display:flex!important;flex-wrap:wrap;gap:3mm;
+    margin-bottom:4mm;justify-content:center;
+  }
+  .g-worker{
+    border:1.5px solid #333!important;background:white!important;
+    color:#000!important;padding:1.5mm 4mm!important;
+    font-size:10pt!important;font-weight:700!important;
+    border-radius:4px!important;font-family:Arial,sans-serif;
+  }
+  .g-worker span{
+    color:#000!important;font-size:10pt!important;font-weight:400!important;
+  }
+  .grafik-scroll{
+    overflow:visible!important;border:none!important;
+    max-height:none!important;height:auto!important;
+  }
+  .grafik-table{border-collapse:collapse;width:100%;table-layout:fixed}
+  .grafik-table th{
+    border:1px solid #555!important;padding:1.5mm 2mm!important;
+    background:#e8e8e8!important;color:#000!important;
+    font-size:9pt!important;font-family:Arial,sans-serif;text-align:center;
+  }
+  .grafik-table td{
+    border:1px solid #bbb!important;padding:1.5mm 2mm!important;
+    background:white!important;color:#000!important;
+    font-size:10pt!important;font-family:Arial,sans-serif;
+  }
+  .grafik-table tr.sat-row td,
+  .grafik-table tr.sun-row td{background:#fff9e6!important}
+  .grafik-table tr.sat-row .day-name,
+  .grafik-table tr.sun-row .day-name,
+  .grafik-table tr.sat-row .day-num,
+  .grafik-table tr.sun-row .day-num{color:#b45309!important;font-weight:700!important}
+  .grafik-table tr.today-row td{background:#e8ffe8!important}
+  .worker-cell select{display:none!important}
+  .worker-cell::after{
+    content:attr(data-name);font-weight:700;font-size:10pt;
+    display:block;padding:0;color:#000;
+  }
+  .worker-cell[data-name="—"]::after{color:#bbb!important;font-weight:400!important}
+  .day-name{color:#555!important;font-size:8pt!important}
+  .day-num{font-weight:700!important;color:#000!important}
+  .grafik-print-area{display:block!important}
+}
+.print-legend{display:none}
+.print-month-title{display:none}
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script>
+/* ───── GRAFIK ───── */
+
+const grafikDays=['нд','пн','вт','ср','чт','пт','сб'];
+const grafikMonthNames=['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+const grafikColors=['blue','green','brown','purple','gray'];
+let grafikData = JSON.parse(localStorage.getItem('grafikData') || '{"2026_3": [{"day": "пт", "date": 1, "n1": "Віта", "n2": "Марина"}, {"day": "сб", "date": 2, "n1": "Віта", "n2": "Марина"}, {"day": "нд", "date": 3, "n1": "Олесь", "n2": "Марина"}, {"day": "пн", "date": 4, "n1": "Віта", "n2": "Олесь"}, {"day": "вт", "date": 5, "n1": "Віта", "n2": "Марина"}, {"day": "ср", "date": 6, "n1": "Віта", "n2": "Марина"}, {"day": "чт", "date": 7, "n1": "Віта", "n2": "Марина"}, {"day": "пт", "date": 8, "n1": "Віта", "n2": "Олесь"}, {"day": "сб", "date": 9, "n1": "Віта", "n2": "Олесь"}, {"day": "нд", "date": 10, "n1": "Марина", "n2": "Олесь"}, {"day": "пн", "date": 11, "n1": "Марина", "n2": "Олесь"}, {"day": "вт", "date": 12, "n1": "Віта", "n2": "Марина"}, {"day": "ср", "date": 13, "n1": "Віта", "n2": "Марина"}, {"day": "чт", "date": 14, "n1": "Віта", "n2": "Олесь"}, {"day": "пт", "date": 15, "n1": "Віта", "n2": "Марина"}, {"day": "сб", "date": 16, "n1": "Олесь", "n2": "Марина"}, {"day": "нд", "date": 17, "n1": "Віта", "n2": "Олесь"}, {"day": "пн", "date": 18, "n1": "Віта", "n2": "Олесь"}, {"day": "вт", "date": 19, "n1": "Віта", "n2": "Марина"}, {"day": "ср", "date": 20, "n1": "Віта", "n2": "Марина"}, {"day": "чт", "date": 21, "n1": "Віта", "n2": "Марина"}, {"day": "пт", "date": 22, "n1": "Віта", "n2": "Олесь"}, {"day": "сб", "date": 23, "n1": "Марина", "n2": "Олесь"}, {"day": "нд", "date": 24, "n1": "Віта", "n2": "Марина"}, {"day": "пн", "date": 25, "n1": "Віта", "n2": "Марина"}, {"day": "вт", "date": 26, "n1": "Віта", "n2": ""}, {"day": "ср", "date": 27, "n1": "Віта", "n2": "Олесь"}, {"day": "чт", "date": 28, "n1": "Віта", "n2": "Олесь"}, {"day": "пт", "date": 29, "n1": "Віта", "n2": "Олесь"}, {"day": "сб", "date": 30, "n1": "Віта", "n2": "Олесь"}, {"day": "нд", "date": 31, "n1": "Віта", "n2": "Олесь"}]}');
+
+function grafikWorkerList(){
+  return (typeof workers!=='undefined'&&workers.length)?workers:['Віта','Марина','Олесь'];
+}
+
+function grafikClass(name){
+  const w=grafikWorkerList();
+  const i=w.indexOf(name);
+  return i>=0?grafikColors[i%grafikColors.length]:'';
+}
+
+function getDaysInMonth(year,month){
+  return new Date(year,month+1,0).getDate();
+}
+
+function getFirstDayOfWeek(year,month){
+  return new Date(year,month,1).getDay();
+}
+
+function createGrafikMonth(year,month){
+  const arr=[];
+  const days=getDaysInMonth(year,month);
+  for(let i=1;i<=days;i++){
+    const dow=new Date(year,month,i).getDay();
+    arr.push({day:grafikDays[dow],date:i,n1:'',n2:''});
+  }
+  return arr;
+}
+
+function grafikKey(year,month){return year+'_'+month;}
+
+function renderGrafik(){
+  const month=parseInt(document.getElementById('monthSelect')?.value||4);
+  const year=parseInt(document.getElementById('yearSelect')?.value||2026);
+  const key=grafikKey(year,month);
+
+  if(!grafikData[key]&&!grafikData[month]){
+    grafikData[key]=createGrafikMonth(year,month);
+  }
+  if(!grafikData[key]&&grafikData[month]){
+    grafikData[key]=grafikData[month];
+  }
+
+  const data=grafikData[key];
+  const body=document.getElementById('grafikBody');
+  if(!body) return;
+
+  const wList=grafikWorkerList();
+  const today=new Date();
+
+  const counts={};
+  wList.forEach(w=>{counts[w]=0;});
+  (grafikData[key]||[]).forEach(row=>{
+    const v1=(row.n1||'').trim();
+    const v2=(row.n2||'').trim();
+    if(v1 && counts[v1]!==undefined) counts[v1]++;
+    if(v2 && counts[v2]!==undefined) counts[v2]++;
+  });
+
+  const wcEl=document.getElementById('grafikWorkerCounts');
+  if(wcEl){
+    wcEl.innerHTML=wList.map((w,i)=>`
+      <div class="g-worker g-${grafikColors[i%grafikColors.length]}">
+        ${w} <span>${counts[w]||0} змін</span>
+      </div>`).join('');
+  }
+
+  const titleEl=document.getElementById('grafikPrintTitle');
+  if(titleEl) titleEl.textContent=grafikMonthNames[month]+' '+year+' — Графік роботи';
+
+  body.innerHTML='';
+  data.forEach((row,index)=>{
+    const isSat=row.day==='сб';
+    const isSun=row.day==='нд';
+    const isToday=year===today.getFullYear()&&month===today.getMonth()&&row.date===today.getDate();
+    const rowClass=isToday?'today-row':isSat?'sat-row':isSun?'sun-row':'';
+    const sel1=`<option value="">—</option>`+wList.map(w=>`<option value="${w}"${row.n1===w?' selected':''}>${w}</option>`).join('');
+    const sel2=`<option value="">—</option>`+wList.map(w=>`<option value="${w}"${row.n2===w?' selected':''}>${w}</option>`).join('');
+    body.innerHTML+=`<tr class="${rowClass}">
+      <td style="text-align:center"><span class="day-name">${row.day}</span></td>
+      <td class="day-num" style="text-align:center">${row.date}</td>
+      <td class="worker-cell ${grafikClass(row.n1)}" data-name="${row.n1||'—'}">
+        <select onchange="updateGrafik('${key}',${index},'n1',this.value)">${sel1}</select>
+      </td>
+      <td class="worker-cell ${grafikClass(row.n2)}" data-name="${row.n2||'—'}">
+        <select onchange="updateGrafik('${key}',${index},'n2',this.value)">${sel2}</select>
+      </td>
+    </tr>`;
+  });
+}
+
+function updateGrafik(key,index,field,value){
+  if(!grafikData[key]) return;
+  grafikData[key][index][field]=value;
+  renderGrafik();
+}
+
+function saveGrafik(){
+  localStorage.setItem('grafikData',JSON.stringify(grafikData));
+  setSyncLabel('💾 Графік збережено');
+  if(typeof fbSet==='function') fbSet('grafikData',grafikData).catch(()=>{});
+}
+
+function printGrafik(){
+  const month=parseInt(document.getElementById('monthSelect')?.value||4);
+  const year=parseInt(document.getElementById('yearSelect')?.value||2026);
+  const title='Графік роботи — '+grafikMonthNames[month]+' '+year;
+  document.title=title;
+  const t=document.getElementById('grafikPrintTitle2');
+  if(t) t.textContent=title;
+  window.print();
+}
+
+  </script>
 </head>
 <body>
 <div class="layout">
@@ -283,6 +505,15 @@ select.fi option{background:#1e2536;color:#e8ecf4}
     </div>
     <div class="nav-item" onclick="showPage('services',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Послуги
+    </div>
+    <div class="nav-item" onclick="showPage('grafik',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      Графік
     </div>
   </nav>
   <div class="sidebar-bottom">
@@ -417,6 +648,70 @@ select.fi option{background:#1e2536;color:#e8ecf4}
       </div>
     </div>
     <div class="services-grid" id="svcList"></div>
+  </section>
+
+  <!-- GRAFIK -->
+  <section class="page" id="page-grafik">
+    <div class="grafik-page">
+
+      <div class="grafik-print-wrap">
+      <div class="print-month-title" id="grafikPrintTitle2"></div>
+      <div id="grafikWorkerCounts" class="g-top-workers"></div>
+      <div class="print-legend">
+        <div style="font-size:10px;color:#555;margin-bottom:6px;padding:4px 8px;border:1px solid #ddd;border-radius:4px;background:#fafafa">
+          <b>Підрахунок змін:</b> кожен запис у колонці №1 або №2 = 1 зміна. Вихідні (сб/нд) рахуються як звичайні зміни.
+        </div>
+      </div>
+
+      <div class="grafik-controls">
+        <select id="monthSelect" onchange="renderGrafik()">
+          <option value="0">Січень</option>
+          <option value="1">Лютий</option>
+          <option value="2">Березень</option>
+          <option value="3">Квітень</option>
+          <option value="4" selected>Травень</option>
+          <option value="5">Червень</option>
+          <option value="6">Липень</option>
+          <option value="7">Серпень</option>
+          <option value="8">Вересень</option>
+          <option value="9">Жовтень</option>
+          <option value="10">Листопад</option>
+          <option value="11">Грудень</option>
+        </select>
+        <select id="yearSelect" onchange="renderGrafik()">
+          <option value="2024">2024</option>
+          <option value="2025">2025</option>
+          <option value="2026" selected>2026</option>
+          <option value="2027">2027</option>
+          <option value="2028">2028</option>
+          <option value="2029">2029</option>
+          <option value="2030">2030</option>
+        </select>
+      </div>
+
+      <div class="grafik-scroll grafik-print-area">
+        <div class="print-month-title" id="grafikPrintTitle"></div>
+        <table class="grafik-table">
+          <thead>
+            <tr>
+              <th style="width:36px">ДЕНЬ</th>
+              <th style="width:28px">№</th>
+              <th>№1</th>
+              <th>№2</th>
+            </tr>
+          </thead>
+          <tbody id="grafikBody"></tbody>
+        </table>
+      </div>
+      </div><!-- /grafik-print-wrap -->
+
+    </div><!-- /grafik-page -->
+
+    <div class="grafik-actions" style="padding:8px 16px;flex-shrink:0">
+      <button class="grafik-save" onclick="saveGrafik()">💾 Зберегти</button>
+      <button class="grafik-pdf" onclick="printGrafik()">🖨 Друк / PDF</button>
+    </div>
+
   </section>
 
 </main>
@@ -1629,7 +1924,7 @@ async function init(){
   const loaded = await loadCloud();
   if(!loaded && !orders.length){orders=demo; await persist();}
   else if(!orders.length){orders=demo; await persist();}
-  migrate(); initSel(); renderAll();
+  migrate(); initSel(); renderAll(); renderGrafik();
   if(_syncActive) setInterval(syncPoll, 8000);
   else setSyncLabel('⚙ вкажіть Firebase config');
 }
