@@ -1035,6 +1035,12 @@ function migrate(){
   });
 }
 
+/* ─── ЛОКАЛЬНА ДАТА (без зсуву UTC) ─── */
+function localToday(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
 function fmtMoney(v){
   // показати копійки лише якщо не ціле число
   if(v===Math.round(v)) return v.toLocaleString();
@@ -1071,7 +1077,7 @@ function renderCal(){
   const first=new Date(selYear,selMonth,1);
   const dim=new Date(selYear,selMonth+1,0).getDate();
   const off=(first.getDay()+6)%7;
-  const todayStr=new Date().toISOString().slice(0,10);
+  const todayStr=localToday();
 
   const dayTot={}, dayUnpaid={};
   monthOrders().forEach(o=>{
@@ -1743,7 +1749,7 @@ function openAddOrder(){
   editIdx=null;
   document.getElementById('ordModalTitle').textContent='Нове замовлення';
   popWorkers();
-  document.getElementById('mDate').value=filterDay||new Date().toISOString().slice(0,10);
+  document.getElementById('mDate').value=filterDay||localToday();
   document.getElementById('mNum').value='';
   document.getElementById('mNote').value='';
   document.getElementById('mStatus').value='new';
@@ -1824,12 +1830,13 @@ function saveOrder(){
   if(editIdx!==null){
     const prev=orders[editIdx];
     if((paid==='paid'||paid==='prepaid')&&prev.paid!==paid){
-      paidDate=new Date().toISOString().slice(0,10);
+      paidDate=localToday();
     } else {
       paidDate=prev.paidDate||'';
     }
   } else if(paid==='paid'||paid==='prepaid'){
-    paidDate=new Date().toISOString().slice(0,10);
+    // Нове замовлення — дата оплати = дата замовлення (не сьогодні!)
+    paidDate=date;
   }
   const createdAt=document.getElementById('mCreatedAt').value;
   const deliveredAt=document.getElementById('mDeliveredAt').value;
@@ -1854,7 +1861,7 @@ function saveOrder(){
 }
 function delOrder(idx){if(!confirm('Видалити замовлення?'))return;orders.splice(idx,1);persist();renderCal();renderDayBar();renderOrders();}
 function markPaid(idx){
-  const today=new Date().toISOString().slice(0,10);
+  const today=localToday();
   const overlay=document.createElement('div');
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:flex;align-items:center;justify-content:center';
   overlay.innerHTML=`
@@ -1875,7 +1882,7 @@ function markPaid(idx){
   document.body.appendChild(overlay);
 }
 function markPrepaid(idx){
-  const today=new Date().toISOString().slice(0,10);
+  const today=localToday();
   const overlay=document.createElement('div');
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:flex;align-items:center;justify-content:center';
   overlay.innerHTML=`
@@ -2025,9 +2032,33 @@ async function init(){
   const loaded = await loadCloud();
   if(!loaded && !orders.length){orders=demo; await persist();}
   else if(!orders.length){orders=demo; await persist();}
-  migrate(); initSel(); renderAll(); renderGrafik();
+  migrate(); initSel(); autoSelectLastDay(); renderAll(); renderGrafik();
   if(_syncActive) setInterval(syncPoll, 8000);
   else setSyncLabel('⚙ вкажіть Firebase config');
+}
+
+/* При відкритті — автоматично обираємо останній день з замовленнями.
+   Якщо сьогодні вже є замовлення — показуємо сьогодні.
+   Якщо сьогодні 0 замовлень — показуємо найближчий попередній день. */
+function autoSelectLastDay(){
+  const todayStr=localToday();
+  const curYM=todayStr.slice(0,7);
+  // беремо замовлення поточного місяця
+  const mo=orders.filter(o=>o.date.slice(0,7)===curYM);
+  const hasTodayOrders=mo.some(o=>getDisplayDate(o)===todayStr);
+  if(hasTodayOrders){
+    filterDay=todayStr;
+  } else {
+    // найпізніший день з замовленнями у поточному місяці
+    const dates=mo.map(o=>getDisplayDate(o)).filter(Boolean);
+    if(dates.length){
+      dates.sort();
+      filterDay=dates[dates.length-1];
+    }
+  }
+  if(filterDay){
+    document.getElementById('calReset').style.display='block';
+  }
 }
 init();
 </script>
