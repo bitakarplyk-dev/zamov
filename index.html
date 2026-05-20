@@ -232,7 +232,7 @@ tbody tr:last-child td{border-bottom:none}
 /* t-shirt color card — wide with size table inside */
 .sklad-tshirt-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:10px}
 .sklad-tshirt-head{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--border)}
-.sklad-tshirt-name{font-size:14px;font-weight:700;flex:1;color:#111}
+.sklad-tshirt-name{font-size:14px;font-weight:700;flex:1;color:#ffffff !important}
 .sklad-tshirt-total{font-size:12px;color:var(--text3)}
 .sklad-size-table{width:100%;border-collapse:collapse}
 .sklad-size-table th{padding:6px 10px;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;text-align:center;border-bottom:1px solid var(--border);background:rgba(255,255,255,.01)}
@@ -2360,7 +2360,7 @@ function renderSklad(){
   };
   const tshirtMeta={
     colorLabel:{біла:'Біла',сіра:'Сіра',синя:'Синя',чорна:'Чорна'},
-    colorIcon:{біла:'👕',сіра:'🩶',синя:'💙',чорна:'⬛'}
+    colorIcon:{біла:'<span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid #aaa;vertical-align:middle;margin-right:2px"></span>',сіра:'<span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#9ca3af;border:2px solid #6b7280;vertical-align:middle;margin-right:2px"></span>',синя:'<span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#3b82f6;border:2px solid #2563eb;vertical-align:middle;margin-right:2px"></span>',чорна:'<span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#111;border:2px solid #555;vertical-align:middle;margin-right:2px"></span>'}
   };
 
   let html='';
