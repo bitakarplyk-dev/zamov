@@ -118,7 +118,7 @@ tbody tr:last-child td{border-bottom:none}
 .svc-expand-row td{padding:0;border-bottom:1px solid var(--border)}
 .svc-expand-inner{background:var(--bg3)}
 .svc-expand-inner table{background:transparent}
-.svc-expand-inner td{padding:5px 11px 5px 40px;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text2)}
+.svc-expand-inner td{padding:5px 11px 5px 40px;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04);color:#ffffff !important}
 .svc-expand-inner tr:last-child td{border-bottom:none}
 
 /* unpaid badge */
@@ -191,6 +191,62 @@ tbody tr:last-child td{border-bottom:none}
 
 /* services / workers pages */
 .services-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:9px}
+
+/* ── СКЛАД ── */
+.sklad-section{margin-bottom:20px}
+.sklad-section-title{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sklad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.sklad-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+.sklad-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sklad-card-name{font-size:14px;font-weight:700}
+.sklad-card-icon{font-size:20px}
+.sklad-rows{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.sklad-row{display:flex;justify-content:space-between;align-items:center;font-size:12px}
+.sklad-row-label{color:var(--text3)}
+.sklad-row-val{font-weight:700}
+.sklad-row-val.green{color:var(--green)}
+.sklad-row-val.red{color:var(--red)}
+.sklad-row-val.amber{color:var(--amber)}
+.sklad-avail{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:var(--radius2);background:var(--bg3);margin-bottom:10px}
+.sklad-avail-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
+.sklad-avail-val{font-size:22px;font-weight:700}
+.sklad-avail-val.green{color:var(--green)}
+.sklad-avail-val.red{color:var(--red)}
+.sklad-avail-val.amber{color:var(--amber)}
+.sklad-btns{display:flex;gap:6px}
+.sklad-defects-log{margin-top:10px;border-top:1px solid var(--border);padding-top:8px}
+.sklad-defects-title{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.sklad-defect-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);padding:3px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.sklad-defect-item:last-child{border-bottom:none}
+.sklad-defect-date{color:var(--text3);min-width:70px}
+.sklad-defect-qty{color:var(--red);font-weight:700;min-width:28px;text-align:right}
+.sklad-defect-reason{flex:1;color:var(--text2)}
+.sklad-defect-del{background:none;border:none;color:var(--text3);cursor:pointer;padding:0 2px;font-size:12px;line-height:1}
+.sklad-defect-del:hover{color:var(--red)}
+.sklad-stock-log{margin-top:6px}
+.sklad-stock-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);padding:2px 0}
+.sklad-stock-date{color:var(--text3);min-width:70px}
+.sklad-stock-qty{color:var(--green);font-weight:700;min-width:28px;text-align:right}
+/* sklad modal */
+.sklad-modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;width:400px;max-width:96vw}
+/* t-shirt color card — wide with size table inside */
+.sklad-tshirt-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:10px}
+.sklad-tshirt-head{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--border)}
+.sklad-tshirt-name{font-size:14px;font-weight:700;flex:1;color:#111}
+.sklad-tshirt-total{font-size:12px;color:var(--text3)}
+.sklad-size-table{width:100%;border-collapse:collapse}
+.sklad-size-table th{padding:6px 10px;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;text-align:center;border-bottom:1px solid var(--border);background:rgba(255,255,255,.01)}
+.sklad-size-table th:first-child{text-align:left;width:52px}
+.sklad-size-table td{padding:6px 10px;font-size:12px;text-align:center;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
+.sklad-size-table tbody tr:last-child td{border-bottom:none}
+.sklad-size-table tbody tr:hover td{background:var(--bg3)}
+.sklad-size-table td:first-child{font-weight:700;font-size:13px;text-align:left;color:var(--text)}
+.sklad-size-badge{display:inline-block;padding:1px 7px;border-radius:100px;font-size:11px;font-weight:700}
+.ssb-green{background:rgba(45,212,160,.12);color:var(--green)}
+.ssb-amber{background:rgba(245,166,35,.12);color:var(--amber)}
+.ssb-red{background:rgba(224,85,85,.12);color:var(--red)}
+.sklad-size-actions{display:flex;gap:4px;justify-content:center}
+.sklad-log-panel{padding:8px 14px;background:var(--bg3);border-top:1px solid var(--border);font-size:11px;color:var(--text2)}
 .svc-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:13px 15px;display:flex;justify-content:space-between;align-items:center}
 .svc-n{font-size:13px;font-weight:600}
 .svc-p{font-size:13px;font-weight:700;color:var(--green)}
@@ -516,6 +572,10 @@ function printGrafik(){
       </svg>
       Графік
     </div>
+    <div class="nav-item" onclick="showPage('sklad',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      Склад
+    </div>
   </nav>
   <div class="sidebar-bottom">
     <div id="adminBadge" style="display:none">
@@ -715,7 +775,46 @@ function printGrafik(){
 
   </section>
 
+  <!-- СКЛАД -->
+  <section class="page" id="page-sklad">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Склад</div>
+        <div class="page-sub">Залишки товарів — автосписання з продажів + брак</div>
+      </div>
+    </div>
+    <div id="skladContent"></div>
+  </section>
+
 </main>
+</div>
+
+<!-- ═══ СКЛАД MODAL — додати поступлення ═══ -->
+<div class="modal-overlay" id="skladStockModal">
+  <div class="sklad-modal">
+    <div class="modal-title" id="skladStockTitle">Додати поступлення</div>
+    <div class="fg"><label class="fl">Кількість</label><input class="fi" type="number" min="1" id="skladStockQty" placeholder="1"></div>
+    <div class="fg" style="margin-top:8px"><label class="fl">Дата</label><input class="fi" type="date" id="skladStockDate"></div>
+    <div class="fg" style="margin-top:8px"><label class="fl">Примітка (необов'язково)</label><input class="fi" type="text" id="skladStockNote" placeholder="накладна №..."></div>
+    <div class="modal-foot" style="margin-top:14px">
+      <button class="btn btn-outline" onclick="closeSkladModals()">Скасувати</button>
+      <button class="btn btn-primary" onclick="saveSkladStock()">✓ Додати</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ СКЛАД MODAL — додати брак ═══ -->
+<div class="modal-overlay" id="skladDefectModal">
+  <div class="sklad-modal">
+    <div class="modal-title" id="skladDefectTitle">Списати брак</div>
+    <div class="fg"><label class="fl">Кількість</label><input class="fi" type="number" min="1" id="skladDefectQty" placeholder="1"></div>
+    <div class="fg" style="margin-top:8px"><label class="fl">Дата</label><input class="fi" type="date" id="skladDefectDate"></div>
+    <div class="fg" style="margin-top:8px"><label class="fl">Причина</label><input class="fi" type="text" id="skladDefectReason" placeholder="напр. тріснула при пресуванні"></div>
+    <div class="modal-foot" style="margin-top:14px">
+      <button class="btn btn-outline" onclick="closeSkladModals()">Скасувати</button>
+      <button class="btn btn-danger" onclick="saveSkladDefect()">✕ Списати</button>
+    </div>
+  </div>
 </div>
 
 <!-- ═══ ORDER MODAL ═══ -->
@@ -865,6 +964,30 @@ let services = JSON.parse(localStorage.getItem('svc4')||'null') || [
   {name:'чашка кольорова',price:300},
   {name:'чашка хамелеон',price:350},
   {name:'футболка',price:700},
+  {name:'футболка біла XS',price:700},
+  {name:'футболка біла S',price:700},
+  {name:'футболка біла M',price:700},
+  {name:'футболка біла L',price:700},
+  {name:'футболка біла XL',price:700},
+  {name:'футболка біла 2XL',price:700},
+  {name:'футболка сіра XS',price:700},
+  {name:'футболка сіра S',price:700},
+  {name:'футболка сіра M',price:700},
+  {name:'футболка сіра L',price:700},
+  {name:'футболка сіра XL',price:700},
+  {name:'футболка сіра 2XL',price:700},
+  {name:'футболка синя XS',price:700},
+  {name:'футболка синя S',price:700},
+  {name:'футболка синя M',price:700},
+  {name:'футболка синя L',price:700},
+  {name:'футболка синя XL',price:700},
+  {name:'футболка синя 2XL',price:700},
+  {name:'футболка чорна XS',price:700},
+  {name:'футболка чорна S',price:700},
+  {name:'футболка чорна M',price:700},
+  {name:'футболка чорна L',price:700},
+  {name:'футболка чорна XL',price:700},
+  {name:'футболка чорна 2XL',price:700},
   {name:'виготовлення холста',price:700},
   {name:'оцифровка',price:240},
   {name:'скан',price:10},
@@ -874,6 +997,56 @@ let services = JSON.parse(localStorage.getItem('svc4')||'null') || [
 ];
 let workers = JSON.parse(localStorage.getItem('wkrs4')||'null') || ['Карплюк','Харченко','Бортник'];
 let orders  = JSON.parse(localStorage.getItem('ord4') ||'[]');
+
+/* ─── СКЛАД ─── */
+const TSHIRT_COLORS=['біла','сіра','синя','чорна'];
+const TSHIRT_SIZES=['XS','S','M','L','XL','2XL'];
+const CUP_COLORS=['біла','кольорова','хамелеон'];
+
+function makeSkladDefaults(){
+  const d={cups:{},tshirts:{}};
+  CUP_COLORS.forEach(c=>{d.cups[c]={stock:[],defects:[]};});
+  TSHIRT_COLORS.forEach(c=>{
+    TSHIRT_SIZES.forEach(s=>{
+      d.tshirts[c+'|'+s]={stock:[],defects:[]};
+    });
+  });
+  return d;
+}
+const SKLAD_DEFAULTS=makeSkladDefaults();
+
+function loadInventory(){
+  const raw=localStorage.getItem('inv1');
+  if(!raw) return makeSkladDefaults();
+  try{
+    const d=JSON.parse(raw);
+    const merged=makeSkladDefaults();
+    ['cups','tshirts'].forEach(cat=>{
+      Object.keys(merged[cat]).forEach(key=>{
+        if(d[cat]&&d[cat][key]){
+          merged[cat][key]=d[cat][key];
+          if(!Array.isArray(merged[cat][key].stock)) merged[cat][key].stock=[];
+          if(!Array.isArray(merged[cat][key].defects)) merged[cat][key].defects=[];
+        }
+      });
+    });
+    return merged;
+  }catch(e){return makeSkladDefaults();}
+}
+let inventory = loadInventory();
+
+/* Маппінг: назва послуги → [категорія, ключ] */
+const SKLAD_MAP={
+  'чашка біла':       ['cups','біла'],
+  'чашка кольорова':  ['cups','кольорова'],
+  'чашка хамелеон':   ['cups','хамелеон'],
+};
+// авто-генерація маппінгу для футболок
+TSHIRT_COLORS.forEach(c=>{
+  TSHIRT_SIZES.forEach(s=>{
+    SKLAD_MAP['футболка '+c+' '+s]=['tshirts',c+'|'+s];
+  });
+});
 
 const now = new Date();
 let selYear=now.getFullYear(), selMonth=now.getMonth(), filterDay=null;
@@ -942,6 +1115,7 @@ async function persist(){
   localStorage.setItem('svc4',JSON.stringify(services));
   localStorage.setItem('wkrs4',JSON.stringify(workers));
   localStorage.setItem('ord4',JSON.stringify(orders));
+  localStorage.setItem('inv1',JSON.stringify(inventory));
   if(!_syncActive){setSyncLabel('⚠ _syncActive=false — Firebase вимкнено','var(--red)');return;}
   try{
     setSyncLabel('📤 відправка в Firebase...','var(--amber)');
@@ -949,6 +1123,7 @@ async function persist(){
     const r1=await fetch(DB+'/svc4.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(services)});
     const r2=await fetch(DB+'/wkrs4.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(workers)});
     const r3=await fetch(DB+'/ord4.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(orders)});
+    await fetch(DB+'/inv1.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(inventory)});
     const r4=await fetch(DB+'/updatedAt.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(ts)});
     if(r3.ok && r4.ok){
       _lastTs=ts;
@@ -965,10 +1140,21 @@ async function loadCloud(){
     const s=await fbGet('svc4');
     const w=await fbGet('wkrs4');
     const o=await fbGet('ord4');
+    const inv=await fbGet('inv1');
     const ts=await fbGet('updatedAt');
     if(s&&Array.isArray(s))services=s;
     if(w&&Array.isArray(w))workers=w;
     if(o&&Array.isArray(o))orders=o;
+    if(inv&&typeof inv==='object'){
+      // merge з makeSkladDefaults
+      const merged=makeSkladDefaults();
+      ['cups','tshirts'].forEach(cat=>{
+        Object.keys(merged[cat]).forEach(key=>{
+          if(inv[cat]&&inv[cat][key]){merged[cat][key]=inv[cat][key];}
+        });
+      });
+      inventory=merged;
+    }
     if(ts) _lastTs=ts;
     return true;
   }catch(e){return false;}
@@ -987,9 +1173,15 @@ async function syncPoll(){
     const o=await fbGet('ord4');
     const s=await fbGet('svc4');
     const w=await fbGet('wkrs4');
+    const inv=await fbGet('inv1');
     if(o&&Array.isArray(o))orders=o;
     if(s&&Array.isArray(s))services=s;
     if(w&&Array.isArray(w))workers=w;
+    if(inv&&typeof inv==='object'){
+      const merged=makeSkladDefaults();
+      ['cups','tshirts'].forEach(cat=>{Object.keys(merged[cat]).forEach(key=>{if(inv[cat]&&inv[cat][key])merged[cat][key]=inv[cat][key];});});
+      inventory=merged;
+    }
     migrate();renderAll();
     setSyncLabel('↻ оновлено з іншого ПК '+now,'var(--green)');
   }catch(e){setSyncLabel('⚠ poll помилка: '+e.message,'var(--red)');}
@@ -1033,6 +1225,27 @@ function migrate(){
     o.items=o.items.map(it=>({...it,service:migrateSvcName(it.service)}));
     return o;
   });
+
+  /* ── Міграція послуг: додаємо футболки з розмірами та чашки якщо їх нема ── */
+  const newSvcs=[];
+  // чашки
+  ['чашка біла','чашка кольорова','чашка хамелеон'].forEach(n=>{
+    if(!services.find(s=>s.name===n)){
+      const prices={'чашка біла':250,'чашка кольорова':300,'чашка хамелеон':350};
+      newSvcs.push({name:n,price:prices[n]});
+    }
+  });
+  // футболки з розмірами
+  TSHIRT_COLORS.forEach(c=>{
+    TSHIRT_SIZES.forEach(sz=>{
+      const n='футболка '+c+' '+sz;
+      if(!services.find(s=>s.name===n)) newSvcs.push({name:n,price:700});
+    });
+  });
+  if(newSvcs.length){
+    services=[...services,...newSvcs];
+    localStorage.setItem('svc4',JSON.stringify(services));
+  }
 }
 
 /* ─── ЛОКАЛЬНА ДАТА (без зсуву UTC) ─── */
@@ -1198,6 +1411,7 @@ function showPage(id,el){
   if(id==='report')renderReport();
   else if(id==='workers')renderWorkers();
   else if(id==='services')renderServices();
+  else if(id==='sklad')renderSklad();
   else renderOrders();
 }
 
@@ -1589,16 +1803,69 @@ function renderWorkers(){
     :'<div class="empty">Немає працівників</div>';
 }
 function renderServices(){
-  document.getElementById('svcList').innerHTML=services.length
-    ?services.map((s,i)=>`<div class="svc-card">
-        <div><div class="svc-n">${s.name}</div><div class="svc-u">за одиницю</div></div>
-        <div style="display:flex;align-items:center;gap:6px">
-          <div class="svc-p" id="svcP_${i}">${s.price} грн</div>
-          <button class="btn btn-outline btn-sm" onclick="editSvcPrice(${i})" title="Змінити ціну">✎</button>
-          <button class="btn btn-danger btn-sm" onclick="delService(${i})">✕</button>
-        </div>
-      </div>`).join('')
-    :'<div class="empty">Немає послуг</div>';
+  if(!services.length){document.getElementById('svcList').innerHTML='<div class="empty">Немає послуг</div>';return;}
+
+  // Групуємо футболки: «футболка <колір> <розмір>» → група «Футболка»
+  const tshirtColors=['біла','сіра','синя','чорна'];
+  function isTshirt(name){return tshirtColors.some(c=>name.startsWith('футболка '+c+' '));}
+
+  // Зберемо унікальні «футболка <колір>» варіанти
+  const tshirtGroups={}; // color → {price, sizes:[{idx,size}]}
+  const otherCards=[];
+
+  services.forEach((s,i)=>{
+    if(isTshirt(s.name)){
+      // «футболка сіра M» → color='сіра', size='M'
+      const parts=s.name.split(' '); // ['футболка','сіра','M']
+      const color=parts[1]||'';
+      const size=parts.slice(2).join(' ')||'';
+      if(!tshirtGroups[color]) tshirtGroups[color]={price:s.price,sizes:[]};
+      tshirtGroups[color].sizes.push({idx:i,size});
+    } else {
+      otherCards.push({s,i});
+    }
+  });
+
+  let html='';
+
+  const tshirtColorStyle={
+    'біла': 'background:#f0f0f0;color:#333;border:1.5px solid #ccc',
+    'сіра': 'background:#6b7280;color:#fff;border:1.5px solid #4b5563',
+    'синя': 'background:#2563eb;color:#fff;border:1.5px solid #1d4ed8',
+    'чорна':'background:#1a1a1a;color:#e5e5e5;border:1.5px solid #444',
+  };
+
+  // Окрема групована картка «Футболка» якщо є хоч один варіант
+  if(Object.keys(tshirtGroups).length){
+    const colorRows=Object.entries(tshirtGroups).map(([color,grp])=>{
+      const badgeStyle=tshirtColorStyle[color]||'background:var(--bg4);color:var(--text);border:1.5px solid var(--border2)';
+      const sizeBtns=grp.sizes.map(({idx,size})=>`<span style="display:inline-flex;align-items:center;gap:3px;background:var(--bg4);border:1px solid var(--border2);border-radius:5px;padding:1px 6px;font-size:11px;font-weight:600;cursor:pointer" title="Змінити ціну" onclick="editSvcPrice(${idx})">${size} <span style="color:var(--green)">${grp.price} грн</span></span>`).join('');
+      return `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+        <span style="display:inline-block;${badgeStyle};border-radius:6px;padding:2px 10px;font-size:12px;font-weight:700;min-width:52px;text-align:center">${color}</span>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">${sizeBtns}</div>
+      </div>`;
+    }).join('');
+    html+=`<div class="svc-card" style="flex-direction:column;align-items:stretch;gap:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div><div class="svc-n">👕 Футболка</div><div class="svc-u">колір + розмір — натисніть розмір щоб змінити ціну</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:2px">${colorRows}</div>
+    </div>`;
+  }
+
+  // Решта послуг — звичайні картки
+  otherCards.forEach(({s,i})=>{
+    html+=`<div class="svc-card">
+      <div><div class="svc-n">${s.name}</div><div class="svc-u">за одиницю</div></div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="svc-p" id="svcP_${i}">${s.price} грн</div>
+        <button class="btn btn-outline btn-sm" onclick="editSvcPrice(${i})" title="Змінити ціну">✎</button>
+        <button class="btn btn-danger btn-sm" onclick="delService(${i})">✕</button>
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('svcList').innerHTML=html;
 }
 function editSvcPrice(i){
   const s=services[i];
@@ -1710,12 +1977,48 @@ function addSvcLine(item){
   modalItems.push(item?{...item}:{service:def.name,qty:1,price:def.price,total:def.price});
   renderSvcLines();
 }
+function buildSvcOptions(selectedName){
+  const tshirtColors=['біла','сіра','синя','чорна'];
+  function isTshirt(name){return tshirtColors.some(c=>name.startsWith('футболка '+c+' '));}
+
+  // Групи: color → [{name,price}]
+  const groups={};
+  const others=[];
+  services.forEach(s=>{
+    if(isTshirt(s.name)){
+      const parts=s.name.split(' ');
+      const color=parts[1]||'';
+      if(!groups[color])groups[color]=[];
+      groups[color].push(s);
+    } else {
+      others.push(s);
+    }
+  });
+
+  let html='';
+  // Спочатку не-футболки
+  others.forEach(s=>{
+    html+=`<option value="${s.name}"${s.name===selectedName?' selected':''}>${s.name}</option>`;
+  });
+  // Потім футболки по групах
+  tshirtColors.forEach(color=>{
+    if(!groups[color]||!groups[color].length)return;
+    html+=`<optgroup label="👕 Футболка ${color}">`;
+    groups[color].forEach(s=>{
+      const size=s.name.split(' ').slice(2).join(' ');
+      html+=`<option value="${s.name}"${s.name===selectedName?' selected':''}>${color} ${size} — ${s.price} грн</option>`;
+    });
+    html+=`</optgroup>`;
+  });
+  return html;
+}
+
 function renderSvcLines(){
   const disc=document.getElementById('mDiscount')?.checked;
   document.getElementById('msvcBody').innerHTML=modalItems.map((it,i)=>`
     <div class="msvc-row">
       <div class="mc"><select onchange="onSC(${i},this.value)">
-        ${services.map(s=>`<option value="${s.name}"${s.name===it.service?' selected':''}>${s.name}</option>`).join('')}
+        ${buildSvcOptions(it.service)}
       </select></div>
       <div class="mc"><input type="number" min="1" step="1" value="${it.qty}" oninput="onQC(${i},this.value)"></div>
       <div class="mc"><input type="number" min="0" step="0.01" value="${it.price}" oninput="onPC(${i},this.value)"></div>
@@ -2027,6 +2330,226 @@ const demo=[
   {date:'2026-05-02',num:'136922',items:[{service:'21x30',qty:2,price:50,total:100}],op:'Харченко',obrobka:'',vydacha:'Харченко',status:'done',paid:'paid',note:''},
 ];
 // demo loaded in init if needed
+
+/* ═══════════════════════════════════════════════
+   СКЛАД — функції
+   ═══════════════════════════════════════════════ */
+
+// Поточний контекст для модальних вікон
+let _skladCtx = {cat:null, key:null, label:null};
+
+// Підрахунок проданих за всіма замовленнями
+function skladSold(cat, key){
+  const svcName = Object.keys(SKLAD_MAP).find(k=>SKLAD_MAP[k][0]===cat&&SKLAD_MAP[k][1]===key);
+  if(!svcName) return 0;
+  const svcLow=svcName.toLowerCase();
+  return orders.reduce((sum,o)=>{
+    return sum+(o.items||[]).filter(it=>(it.service||'').trim().toLowerCase()===svcLow).reduce((s,it)=>s+(it.qty||1),0);
+  },0);
+}
+function skladTotalDefects(cat,key){return(inventory[cat][key].defects||[]).reduce((s,d)=>s+(d.qty||0),0);}
+function skladTotalStock(cat,key){return(inventory[cat][key].stock||[]).reduce((s,d)=>s+(d.qty||0),0);}
+
+function renderSklad(){
+  const el=document.getElementById('skladContent');
+  if(!el)return;
+
+  const cupMeta={
+    colorLabel:{біла:'Біла',кольорова:'Кольорова',хамелеон:'Хамелеон'},
+    colorIcon:{біла:'⬜',кольорова:'🎨',хамелеон:'🌈'}
+  };
+  const tshirtMeta={
+    colorLabel:{біла:'Біла',сіра:'Сіра',синя:'Синя',чорна:'Чорна'},
+    colorIcon:{біла:'👕',сіра:'🩶',синя:'💙',чорна:'⬛'}
+  };
+
+  let html='';
+
+  /* ── ЧАШКИ ── */
+  html+=`<div class="sklad-section">
+    <div class="sklad-section-title"><span>☕</span>Чашки</div>
+    <div class="sklad-grid">`;
+
+  CUP_COLORS.forEach(color=>{
+    const totalIn=skladTotalStock('cups',color);
+    const sold=skladSold('cups',color);
+    const defects=skladTotalDefects('cups',color);
+    const avail=totalIn-sold-defects;
+    const aColor=avail>5?'green':avail>0?'amber':'red';
+
+    const defList=inventory.cups[color].defects||[];
+    const stockList=inventory.cups[color].stock||[];
+
+    let logsHtml='';
+    if(stockList.length){
+      logsHtml+=`<div class="sklad-defects-log"><div class="sklad-defects-title">📦 Поступлення</div>`;
+      [...stockList].reverse().slice(0,3).forEach((s,i)=>{
+        const ri=stockList.length-1-i;
+        logsHtml+=`<div class="sklad-defect-item"><span class="sklad-defect-date">${fmt(s.date)}</span><span class="sklad-stock-qty">+${s.qty}</span><span class="sklad-defect-reason">${s.note||'—'}</span><button class="sklad-defect-del" onclick="deleteSkladStock('cups','${color}',${ri})">✕</button></div>`;
+      });
+      logsHtml+='</div>';
+    }
+    if(defList.length){
+      logsHtml+=`<div class="sklad-defects-log"><div class="sklad-defects-title">🚫 Брак</div>`;
+      [...defList].reverse().slice(0,3).forEach((d,i)=>{
+        const ri=defList.length-1-i;
+        logsHtml+=`<div class="sklad-defect-item"><span class="sklad-defect-date">${fmt(d.date)}</span><span class="sklad-defect-qty">−${d.qty}</span><span class="sklad-defect-reason">${d.reason||'—'}</span><button class="sklad-defect-del" onclick="deleteSkladDefect('cups','${color}',${ri})">✕</button></div>`;
+      });
+      logsHtml+='</div>';
+    }
+
+    html+=`<div class="sklad-card">
+      <div class="sklad-card-top"><div class="sklad-card-name">${cupMeta.colorIcon[color]} ${cupMeta.colorLabel[color]}</div></div>
+      <div class="sklad-avail"><div class="sklad-avail-label">Залишок</div><div class="sklad-avail-val ${aColor}">${avail}</div></div>
+      <div class="sklad-rows">
+        <div class="sklad-row"><span class="sklad-row-label">📦 Надійшло</span><span class="sklad-row-val">${totalIn}</span></div>
+        <div class="sklad-row"><span class="sklad-row-label">✅ Продано</span><span class="sklad-row-val green">${sold}</span></div>
+        <div class="sklad-row"><span class="sklad-row-label">🚫 Брак</span><span class="sklad-row-val red">${defects}</span></div>
+      </div>
+      <div class="sklad-btns">
+        <button class="btn btn-outline btn-sm" style="flex:1" onclick="openSkladStock('cups','${color}','${cupMeta.colorLabel[color]} (Чашка)')">+ Поступлення</button>
+        <button class="btn btn-danger btn-sm" style="flex:1" onclick="openSkladDefect('cups','${color}','${cupMeta.colorLabel[color]} (Чашка)')">✕ Брак</button>
+      </div>
+      ${logsHtml}
+    </div>`;
+  });
+  html+='</div></div>';
+
+  /* ── ФУТБОЛКИ ── */
+  html+=`<div class="sklad-section">
+    <div class="sklad-section-title"><span>👕</span>Футболки</div>`;
+
+  TSHIRT_COLORS.forEach(color=>{
+    const colorLabel=tshirtMeta.colorLabel[color];
+    const colorIcon=tshirtMeta.colorIcon[color];
+
+    // підсумки по кольору
+    let totalColor=0,soldColor=0,defColor=0;
+    TSHIRT_SIZES.forEach(sz=>{
+      const key=color+'|'+sz;
+      totalColor+=skladTotalStock('tshirts',key);
+      soldColor+=skladSold('tshirts',key);
+      defColor+=skladTotalDefects('tshirts',key);
+    });
+    const availColor=totalColor-soldColor-defColor;
+    const aColorCls=availColor>5?'green':availColor>0?'amber':'red';
+
+    let rows='';
+    TSHIRT_SIZES.forEach(sz=>{
+      const key=color+'|'+sz;
+      const tin=skladTotalStock('tshirts',key);
+      const sol=skladSold('tshirts',key);
+      const def=skladTotalDefects('tshirts',key);
+      const av=tin-sol-def;
+      const avCls=av>5?'ssb-green':av>0?'ssb-amber':'ssb-red';
+      const avDisplay=av>0?av:(av===0?'0':''+av);
+      rows+=`<tr>
+        <td><span style="font-size:12px;font-weight:700">${sz}</span></td>
+        <td>${tin}</td>
+        <td style="color:var(--green)">${sol}</td>
+        <td style="color:var(--red)">${def}</td>
+        <td><span class="sklad-size-badge ${avCls}">${avDisplay}</span></td>
+        <td>
+          <div class="sklad-size-actions">
+            <button class="btn btn-outline btn-xs" title="Поступлення" onclick="openSkladStock('tshirts','${key}','${colorLabel} ${sz}')">+</button>
+            <button class="btn btn-danger btn-xs" title="Брак" onclick="openSkladDefect('tshirts','${key}','${colorLabel} ${sz}')">✕</button>
+          </div>
+        </td>
+      </tr>`;
+    });
+
+    html+=`<div class="sklad-tshirt-card">
+      <div class="sklad-tshirt-head">
+        <div class="sklad-tshirt-name">${colorIcon} ${colorLabel}</div>
+        <div class="sklad-tshirt-total">
+          Надійшло: <b>${totalColor}</b> &nbsp;|&nbsp;
+          Продано: <b style="color:var(--green)">${soldColor}</b> &nbsp;|&nbsp;
+          Брак: <b style="color:var(--red)">${defColor}</b> &nbsp;|&nbsp;
+          Залишок: <b class="${aColorCls}">${availColor}</b>
+        </div>
+      </div>
+      <table class="sklad-size-table">
+        <thead><tr>
+          <th>Розмір</th>
+          <th>Надійшло</th>
+          <th>Продано</th>
+          <th>Брак</th>
+          <th>Залишок</th>
+          <th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  });
+
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function openSkladStock(cat,key,label){
+  _skladCtx={cat,key,label};
+  document.getElementById('skladStockTitle').textContent='📦 Поступлення — '+label;
+  document.getElementById('skladStockQty').value='';
+  document.getElementById('skladStockDate').value=localToday();
+  document.getElementById('skladStockNote').value='';
+  document.getElementById('skladStockModal').classList.add('open');
+  setTimeout(()=>document.getElementById('skladStockQty').focus(),100);
+}
+
+function openSkladDefect(cat,key,label){
+  _skladCtx={cat,key,label};
+  document.getElementById('skladDefectTitle').textContent='🚫 Брак — '+label;
+  document.getElementById('skladDefectQty').value='';
+  document.getElementById('skladDefectDate').value=localToday();
+  document.getElementById('skladDefectReason').value='';
+  document.getElementById('skladDefectModal').classList.add('open');
+  setTimeout(()=>document.getElementById('skladDefectQty').focus(),100);
+}
+
+function closeSkladModals(){
+  document.getElementById('skladStockModal').classList.remove('open');
+  document.getElementById('skladDefectModal').classList.remove('open');
+}
+
+async function saveSkladStock(){
+  const qty=parseInt(document.getElementById('skladStockQty').value)||0;
+  if(qty<=0){alert('Вкажіть кількість > 0');return;}
+  const date=document.getElementById('skladStockDate').value||localToday();
+  const note=document.getElementById('skladStockNote').value.trim();
+  const {cat,key}=_skladCtx;
+  if(!inventory[cat]||!inventory[cat][key])return;
+  inventory[cat][key].stock.push({date,qty,note});
+  closeSkladModals();
+  await persist();
+  renderSklad();
+}
+
+async function saveSkladDefect(){
+  const qty=parseInt(document.getElementById('skladDefectQty').value)||0;
+  if(qty<=0){alert('Вкажіть кількість > 0');return;}
+  const date=document.getElementById('skladDefectDate').value||localToday();
+  const reason=document.getElementById('skladDefectReason').value.trim();
+  const {cat,key}=_skladCtx;
+  if(!inventory[cat]||!inventory[cat][key])return;
+  inventory[cat][key].defects.push({date,qty,reason});
+  closeSkladModals();
+  await persist();
+  renderSklad();
+}
+
+async function deleteSkladDefect(cat,key,idx){
+  if(!confirm('Видалити запис про брак?'))return;
+  inventory[cat][key].defects.splice(idx,1);
+  await persist();
+  renderSklad();
+}
+
+async function deleteSkladStock(cat,key,idx){
+  if(!confirm('Видалити поступлення?'))return;
+  inventory[cat][key].stock.splice(idx,1);
+  await persist();
+  renderSklad();
+}
 
 async function init(){
   const loaded = await loadCloud();
